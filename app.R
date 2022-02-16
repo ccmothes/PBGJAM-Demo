@@ -10,6 +10,8 @@ library(Metrics)
 library(colorspace)
 library(raster)
 library(bslib)
+library(dplyr)
+library(sf)
 
 source("addRasterImage2.R")
 
@@ -57,6 +59,9 @@ varsGObetas3b <- c("Scientific name" = "scientificName")
 
 
 
+
+
+
 corner_element = HTML(paste0('<a href=',shQuote("https://pbgjam.env.duke.edu/"), '>', 
                              '<img src=', 'logo.png', '/></a>'))
 
@@ -80,6 +85,7 @@ ui <-
                    #base_font = font_google("Cairo")
                  ),
 
+   # MAPS UI --------------------------------------------------------------------
     tabPanel("Species Maps",
              # div(class = "outer"),
              
@@ -223,6 +229,8 @@ ui <-
              )
              
              )),
+   
+   # MODELs UI ---------------------------------------------------------------------------
              navbarMenu("Species Models",
                         tabPanel("Communities",
                                  sidebarLayout(position = "left",
@@ -438,7 +446,71 @@ ui <-
                                                              tabPanel("Accuracy", 
                                                                       plotOutput("plot2Acc")),
                                                              id = "conditionedPanels")
-                                               ))))
+                                               )))),
+   
+   # NEON UI --------------------------------------------------------------------
+    tabPanel("NEON Sites",
+               fluidPage(
+                 fluidRow(
+                   column(7,
+                          fluidRow(
+                           
+                            p(strong("Change in Species Abundance")),
+                            br(),
+                          
+                          fluidRow(  
+                          column(4,
+                          selectInput("neon_spec", label = "Choose Species",
+                                      choices = c("Brachi fumans" = "brachiFumans",
+                                                  "Pteros femora" = "pterosFemora"))),
+                          column(4,
+                          radioButtons("neon_scenario1", label = "Choose Scenario",
+                                       choices = c("SSP 245" = "s1",
+                                                   "SSP 585" = "s2")))),
+                          
+                
+                          leaflet::leafletOutput("NEONmap1", height = 500)
+                          
+
+                   ),
+                   hr(),
+                   p(strong("Habitat Characteristics")),
+                   br(),
+                   fluidRow(
+                     column(4,
+                            selectInput("neon_env", label = "Choose Environmental Variable",
+                                        choice = c("Temperature" = "temp",
+                                                   "Defecit" = "def",
+                                                   "Gap Fraction" = "gp_f_10"))),
+                     column(4,
+                            radioButtons("neon_scenario2", label = "Choose Scanario",
+                                         choices = c("SSP 245" = "s1",
+                                                     "SSP 585" = "s2")))
+                     ),
+                   
+                     leaflet::leafletOutput("NEONmap2", height = 500)
+                   
+                                         
+                   ),
+                   column(5,
+                       p(strong("Click a site on the map to view its habitat conditions")),
+                       h5(strong(textOutput("siteText"))),
+                       selectInput("habitatVar", "Choose Habitat Variable",
+                                   choices = c(
+                                     "Terrain" = "terrain",
+                                     "Gap Fraction" = "gf"
+                                   )),
+                       plotOutput("habitatPNG", height = 250),
+                       p(strong("NEON Time Series")),
+                       selectInput("neon_timeVar", "Choose variable",
+                                   choices = "Soil Moisture"),
+                       #plotly time series output here
+                       hr()
+                     
+                   )
+                 )
+               )
+    )
 )
     
 
@@ -981,6 +1053,115 @@ server <- function(input, output, session) {
     }, deleteFile = FALSE)
     
     
+# NEON TAB ----------------------------------------------------------------------------
+    
+
+    #read in species data
+    neon_spec_data <- reactive({
+      st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
+        #jitter points for plot
+        st_jitter(factor = 0.009) %>%
+        #create constance column name for scenario
+        rename(scenario = input$neon_scenario1) %>% 
+        #filter out zeros, depending on scenario
+        filter(scenario != 0)
+    })
+    
+    #get reactive scenario
+    # scen <- reactive({
+    #   noquote(input$neon_scenario1)
+    # })
+    
+    # first species map
+    
+    #palette based on scenario
+    pal <- reactive({
+      colorBin(palette = "RdBu", domain = c(min(neon_spec_data()$scenario, na.rm = TRUE),
+                                            abs(min(neon_spec_data()$scenario, na.rm = TRUE))))
+      
+    })
+    
+    output$NEONmap1 <- renderLeaflet({
+      leaflet() %>% 
+        addTiles() %>% 
+        addCircleMarkers(data = neon_spec_data(), layerId = ~site,
+                         color = "black",
+                         fillColor = ~pal()(scenario), weight = 1, stroke = TRUE,
+                         radius = 5, fillOpacity = 1,
+                         popup = paste("Site:", neon_spec_data()$site, "<br>",
+                                       paste0(input$neon_scenario1, ":"), neon_spec_data()$scenario)
+                         )
+    })
+    
+
+    output$NEONmap2 <- renderLeaflet(
+      leaflet() %>% 
+        addTiles()
+    )
+    
+    #Add selected site name as header
+    output$siteText <- renderText(
+      if(is.null(input$NEONmap1_marker_click)){
+        return(NULL)
+      } else {
+        input$NEONmap1_marker_click$id
+      })
+    
+    
+    #paste habitat variable png
+    observeEvent(input$NEONmap1_marker_click, {
+      
+      output$habitatPNG <- renderImage({
+        if (input$habitatVar == "terrain") {
+          list(
+            src = paste0(
+              "data/ABBY_terrain/",
+              input$NEONmap1_marker_click$id,
+              ".png"
+            ),
+            width = 200,
+            height = 200
+          )
+        }
+        
+        else {
+          list(
+            src = paste0(
+              "data/ABBY_gf/",
+              input$NEONmap1_marker_click$id,
+              "_bet_norm_chm.png"
+            ),
+            width = 200,
+            height = 200
+          )
+        }
+        
+        
+        
+      }, deleteFile = FALSE)
+      
+    })
+    
+    # output$habitatPNG <- renderImage({
+    #   
+    #   if(is.null(input$NEONmap1_marker_click)){
+    #     return(NULL)
+    #   } 
+    #     
+    #   
+    #   if(input$neon_env == "Terrain"){
+    #     list(src = paste0("data/ABBY_", input$neon_env, "/", input$NEONmap1_marker_click$id, ".png"),
+    #          width = 200, height = 200)
+    #   }
+    #   
+    #   if(input$neon_env == "Gap Fraction"){
+    #     list(src = paste0("data/ABBY_", input$neon_env, "/", input$NEONmap1_marker_click$id, "_bet_norm_chm.png"),
+    #          width = 200, height = 200)
+    #   }
+    #   
+    # }, deleteFile = FALSE)
+    # 
+
 }
 
 # Run the application 
