@@ -44,7 +44,8 @@ leaflet() %>%
 
 # scatter plot (choose variables)
 bf_df %>% 
-plot_ly(x = ~s1_temp, y = ~s1_def, color = ~gp_f_10)
+plot_ly(x = ~s1_temp, y = ~s1_def, color = ~gp_f_10, hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>"),
+        type = "scatter", mode = "markers")
 
 # box plot (highlight species, better with multiple species)
 plot_ly(data = combined, y = ~ s2, color = ~species, type = "box")

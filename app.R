@@ -1099,7 +1099,7 @@ server <- function(input, output, session) {
     neon_spec_data <- reactive({
       st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
         #jitter points for plot
-        st_jitter(factor = 0.009) %>%
+        #st_jitter(factor = 0.009) %>%
         #create constance column name for scenario
         rename(scenario = input$neon_scenario1) %>% 
         #filter out zeros, depending on scenario
@@ -1113,7 +1113,8 @@ server <- function(input, output, session) {
     #palette based on scenario
     pal <- reactive({
       colorBin(palette = "RdBu", domain = c(min(neon_spec_data()$scenario, na.rm = TRUE),
-                                            abs(min(neon_spec_data()$scenario, na.rm = TRUE))))
+                                            abs(min(neon_spec_data()$scenario, na.rm = TRUE))),
+               reverse = TRUE)
       
     })
     
@@ -1275,6 +1276,7 @@ server <- function(input, output, session) {
       st_drop_geometry(env_data()) %>% as_tibble() %>% 
       
       plot_ly(x = ~get(input$choose_x), y = ~get(input$choose_y), color = ~get(input$choose_color),
+              hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>"),
               type = "scatter", mode = "markers") %>%
         plotly::layout(yaxis = list(title = input$choose_y),
                        xaxis = list(title = input$choose_x)) %>%
