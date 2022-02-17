@@ -12,6 +12,7 @@ library(raster)
 library(bslib)
 library(dplyr)
 library(sf)
+library(plotly)
 
 source("addRasterImage2.R")
 
@@ -58,7 +59,19 @@ varsGObetas3b <- c("Scientific name" = "scientificName")
 
 
 
+#read in soil temp csv
+st_30 <- read.csv("data/st_30.csv")
 
+#function to read in USGS basemaps
+GetURL <- function(service, host = "basemap.nationalmap.gov") {
+  sprintf("https://%s/arcgis/services/%s/MapServer/WmsServer", host, service)
+}
+
+#attribution for usgs maps
+att <- paste0("<a href='https://www.usgs.gov/'>",
+              "U.S. Geological Survey</a> | ",
+              "<a href='https://www.usgs.gov/laws/policies_notices.html'>",
+              "Policies</a>")
 
 
 
@@ -84,6 +97,94 @@ ui <-
                    #success = "#f28e35",
                    #base_font = font_google("Cairo")
                  ),
+             
+             # NEON UI --------------------------------------------------------------------
+             tabPanel("NEON Sites",
+                      fluidPage(
+                        fluidRow(
+                          column(7,
+                                 
+                                   
+                                   h3(strong("Change in Species Abundance")),
+                                   br(),
+                                   
+                                   fluidRow(  
+                                     column(4,
+                                            selectInput("neon_spec", label = "Choose Species",
+                                                        choices = c("Brachi fumans" = "brachiFumans",
+                                                                    "Pteros femora" = "pterosFemora"))),
+                                     column(4,
+                                            radioButtons("neon_scenario1", label = "Choose Scenario",
+                                                         choices = c("SSP 245" = "s1",
+                                                                     "SSP 585" = "s2")))),
+                                   
+                                   
+                                   leaflet::leafletOutput("NEONmap1", height = 500)
+                                   
+                                   
+                                 ,
+                                 br(),
+                                 br(),
+                                 br(),
+                                 br(),
+                                 br(),
+                                 br(),
+                                 hr(),
+                                 h3(strong("Habitat Characteristics")),
+                                 br(),
+                                 fluidRow(
+                                   column(4,
+                                          selectInput("neon_env", label = "Choose Environmental Variable",
+                                                      choice = c("Temperature" = "temp",
+                                                                 "Defecit" = "def",
+                                                                 "Gap Fraction" = "gp_f_10"))),
+                                   column(4,
+                                          radioButtons("neon_scenario2", label = "Choose Scanario",
+                                                       choices = c("SSP 245" = "s1",
+                                                                   "SSP 585" = "s2")))
+                                 ),
+                                 
+                                 leaflet::leafletOutput("NEONmap2", height = 500)
+                                 
+                                 
+                          ),
+                          column(5,
+                                 br(),
+                                 br(),
+                                 p(strong("Click a site on the map to view its habitat conditions")),
+                                 h5(strong(textOutput("siteText"))),
+                                 selectInput("habitatVar", "Choose Habitat Variable",
+                                             choices = c(
+                                               "Terrain" = "terrain",
+                                               "Gap Fraction" = "gf"
+                                             )),
+                                 plotOutput("habitatPNG", height = 200),
+                                 p(strong("NEON Time Series")),
+                                 selectInput("neon_timeVar", "Choose variable",
+                                             choices = "Soil Moisture"),
+                                 #plotly time series output here
+                                 plotlyOutput("neon_timeseries", height = 250),
+                                 br(),
+                                 hr(),
+                                 p(strong("Compare across habitat and abundance")),
+                                 selectInput("choose_x", "Choose X:",
+                                             choices = c("s1", "s2", "s1_temp", "s2_temp", 
+                                                         "s1_def", "s2_def", "gp_f_10"),
+                                             selected = "s1_temp"),
+                                 selectInput("choose_y", "Choose Y:",
+                                             choices = c("s1", "s2", "s1_temp", "s2_temp", 
+                                                         "s1_def", "s2_def", "gp_f_10"),
+                                             selected = "s1_def"),
+                                 selectInput("choose_color", "Color By: ",
+                                             choices = c("s1", "s2", "s1_temp", "s2_temp", 
+                                                         "s1_def", "s2_def", "gp_f_10"),
+                                             selected = "gp_f_10"),
+                                 plotlyOutput("choose_scatter")
+                                 
+                          )
+                        )
+                      )
+             ),          
 
    # MAPS UI --------------------------------------------------------------------
     tabPanel("Species Maps",
@@ -446,71 +547,9 @@ ui <-
                                                              tabPanel("Accuracy", 
                                                                       plotOutput("plot2Acc")),
                                                              id = "conditionedPanels")
-                                               )))),
+                                               ))))
    
-   # NEON UI --------------------------------------------------------------------
-    tabPanel("NEON Sites",
-               fluidPage(
-                 fluidRow(
-                   column(7,
-                          fluidRow(
-                           
-                            p(strong("Change in Species Abundance")),
-                            br(),
-                          
-                          fluidRow(  
-                          column(4,
-                          selectInput("neon_spec", label = "Choose Species",
-                                      choices = c("Brachi fumans" = "brachiFumans",
-                                                  "Pteros femora" = "pterosFemora"))),
-                          column(4,
-                          radioButtons("neon_scenario1", label = "Choose Scenario",
-                                       choices = c("SSP 245" = "s1",
-                                                   "SSP 585" = "s2")))),
-                          
-                
-                          leaflet::leafletOutput("NEONmap1", height = 500)
-                          
-
-                   ),
-                   hr(),
-                   p(strong("Habitat Characteristics")),
-                   br(),
-                   fluidRow(
-                     column(4,
-                            selectInput("neon_env", label = "Choose Environmental Variable",
-                                        choice = c("Temperature" = "temp",
-                                                   "Defecit" = "def",
-                                                   "Gap Fraction" = "gp_f_10"))),
-                     column(4,
-                            radioButtons("neon_scenario2", label = "Choose Scanario",
-                                         choices = c("SSP 245" = "s1",
-                                                     "SSP 585" = "s2")))
-                     ),
-                   
-                     leaflet::leafletOutput("NEONmap2", height = 500)
-                   
-                                         
-                   ),
-                   column(5,
-                       p(strong("Click a site on the map to view its habitat conditions")),
-                       h5(strong(textOutput("siteText"))),
-                       selectInput("habitatVar", "Choose Habitat Variable",
-                                   choices = c(
-                                     "Terrain" = "terrain",
-                                     "Gap Fraction" = "gf"
-                                   )),
-                       plotOutput("habitatPNG", height = 250),
-                       p(strong("NEON Time Series")),
-                       selectInput("neon_timeVar", "Choose variable",
-                                   choices = "Soil Moisture"),
-                       #plotly time series output here
-                       hr()
-                     
-                   )
-                 )
-               )
-    )
+  
 )
     
 
@@ -1067,12 +1106,9 @@ server <- function(input, output, session) {
         filter(scenario != 0)
     })
     
-    #get reactive scenario
-    # scen <- reactive({
-    #   noquote(input$neon_scenario1)
-    # })
     
     # first species map
+    
     
     #palette based on scenario
     pal <- reactive({
@@ -1081,23 +1117,33 @@ server <- function(input, output, session) {
       
     })
     
+    grp <- c("USGS Topo", "USGS Imagery",
+             "USGS Shaded Relief")
+    
     output$NEONmap1 <- renderLeaflet({
       leaflet() %>% 
-        addTiles() %>% 
+        
+        addWMSTiles(GetURL("USGSTopo"),
+                    group = grp[1], attribution = att, layers = "0") %>% 
+        addWMSTiles(GetURL("USGSImageryOnly"),
+                    group = grp[2], attribution = att, layers = "0") %>%
+        addWMSTiles(GetURL("USGSShadedReliefOnly"),
+                    group = grp[3], attribution = att, layers = "0") %>% 
+        addWMSTiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', 
+                    attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+                    group = "Dark Theme", layers = "0") %>% 
+       
         addCircleMarkers(data = neon_spec_data(), layerId = ~site,
                          color = "black",
                          fillColor = ~pal()(scenario), weight = 1, stroke = TRUE,
                          radius = 5, fillOpacity = 1,
                          popup = paste("Site:", neon_spec_data()$site, "<br>",
                                        paste0(input$neon_scenario1, ":"), neon_spec_data()$scenario)
-                         )
+                         ) %>% 
+          addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", "USGS Imagery", "USGS Shaded Relief"))
     })
     
 
-    output$NEONmap2 <- renderLeaflet(
-      leaflet() %>% 
-        addTiles()
-    )
     
     #Add selected site name as header
     output$siteText <- renderText(
@@ -1142,25 +1188,102 @@ server <- function(input, output, session) {
       
     })
     
-    # output$habitatPNG <- renderImage({
-    #   
-    #   if(is.null(input$NEONmap1_marker_click)){
-    #     return(NULL)
-    #   } 
-    #     
-    #   
-    #   if(input$neon_env == "Terrain"){
-    #     list(src = paste0("data/ABBY_", input$neon_env, "/", input$NEONmap1_marker_click$id, ".png"),
-    #          width = 200, height = 200)
-    #   }
-    #   
-    #   if(input$neon_env == "Gap Fraction"){
-    #     list(src = paste0("data/ABBY_", input$neon_env, "/", input$NEONmap1_marker_click$id, "_bet_norm_chm.png"),
-    #          width = 200, height = 200)
-    #   }
-    #   
-    # }, deleteFile = FALSE)
-    # 
+    
+    #NEON environment plotly
+    
+    
+    observeEvent(input$NEONmap1_marker_click, {
+     
+       output$neon_timeseries <- renderPlotly({
+        plot_ly(st_30) %>%
+          add_trace(x = st_30$startDateTime, y = st_30$soilTempMean,type = 'scatter',
+                    mode = "lines", connectgaps = TRUE) %>% 
+          plotly::layout(yaxis = list(title = "Mean Soil Temperature"),
+                         xaxis = list(type = "date", tickformate = "%d %B <br> %Y"))
+        
+        
+        
+      })
+      
+      
+      
+    })
+
+    #read in environmental data (keep same species to use for scatter plot)
+    env_data <-  reactive({
+      st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
+        #jitter points for plot
+        st_jitter(factor = 0.009)
+      
+    })
+     
+    
+    neon_env_data <- reactive({
+        
+      if(input$neon_env == "gp_f_10"){
+        neon_env_data <- env_data() %>% 
+          rename(variable = gp_f_10)
+      } else {
+        neon_env_data <- env_data() %>% 
+          rename(variable = paste0(input$neon_scenario2, "_", input$neon_env))
+      }
+      
+    })
+    
+    
+    
+    # environmental map
+    
+    pal2 <- reactive({
+      
+      if(input$neon_env == "gp_f_10"){
+        colorNumeric(palette = "Greens", domain = neon_env_data()$variable, reverse = TRUE)
+      } else {
+        
+        colorNumeric(palette = "Reds", domain = neon_env_data()$variable)
+      }
+      
+      
+      
+    })
+    
+    output$NEONmap2 <- renderLeaflet(
+      leaflet() %>% 
+        addWMSTiles(GetURL("USGSTopo"),
+                    group = grp[1], attribution = att, layers = "0") %>% 
+        addWMSTiles(GetURL("USGSImageryOnly"),
+                    group = grp[2], attribution = att, layers = "0") %>%
+        addWMSTiles(GetURL("USGSShadedReliefOnly"),
+                    group = grp[3], attribution = att, layers = "0") %>% 
+        addWMSTiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', 
+                    attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+                    group = "Dark Theme", layers = "0") %>% 
+        
+        addCircleMarkers(data = neon_env_data(), layerId = ~site,
+                         color = "black",
+                         fillColor = ~pal2()(variable), weight = 1, stroke = TRUE,
+                         radius = 5, fillOpacity = 1,
+                         popup = paste("Site:", neon_env_data()$site, "<br>",
+                                       paste0(input$neon_env, ":"), neon_env_data()$variable)
+        ) %>% 
+        addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", "USGS Imagery", "USGS Shaded Relief"))
+    )
+    
+    
+    output$choose_scatter <- renderPlotly({
+      
+      st_drop_geometry(env_data()) %>% as_tibble() %>% 
+      
+      plot_ly(x = ~get(input$choose_x), y = ~get(input$choose_y), color = ~get(input$choose_color),
+              type = "scatter", mode = "markers") %>%
+        plotly::layout(yaxis = list(title = input$choose_y),
+                       xaxis = list(title = input$choose_x)) %>%
+        colorbar(title=input$choose_color)
+      
+    })
+    
+    
+    
 
 }
 
