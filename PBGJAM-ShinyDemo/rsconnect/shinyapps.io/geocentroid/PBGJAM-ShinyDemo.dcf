@@ -1,0 +1,13 @@
+name: PBGJAM-ShinyDemo
+title: PBGJAM-ShinyDemo
+username:
+account: geocentroid
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5686123
+bundleId: 5693500
+url: https://geocentroid.shinyapps.io/PBGJAM-ShinyDemo/
+when: 1647475706.90287
+lastSyncTime: 1647475706.90287
+asMultiple: FALSE
+asStatic: FALSE
