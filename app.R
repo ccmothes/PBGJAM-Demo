@@ -130,7 +130,7 @@ ui <-
                                  br(),
                                  br(),
                                  hr(),
-                                 h3(strong("Habitat Characteristics")),
+                                 h3(strong("Environmental Characteristics")),
                                  br(),
                                  fluidRow(
                                    column(4,
@@ -139,7 +139,7 @@ ui <-
                                                                  "Defecit" = "def",
                                                                  "Gap Fraction" = "gp_f_10"))),
                                    column(4,
-                                          radioButtons("neon_scenario2", label = "Choose Scanario",
+                                          radioButtons("neon_scenario2", label = "Choose Scanario (climate only)",
                                                        choices = c("SSP 245" = "s1",
                                                                    "SSP 585" = "s2")))
                                  ),
@@ -1098,20 +1098,31 @@ server <- function(input, output, session) {
     #read in species data
     neon_spec_data <- reactive({
       st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
-        #jitter points for plot
-        #st_jitter(factor = 0.009) %>%
-        #create constance column name for scenario
+      
+        #create constant column name for scenario
         rename(scenario = input$neon_scenario1) %>% 
         #filter out zeros, depending on scenario
         filter(scenario != 0)
     })
+    
+    # #make jittered points for zoomed out view
+    # neon_spec_jitter <- reactive({
+    #   st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
+    #     #jitter points
+    #     st_jitter(factor = 0.009) %>% 
+    #     #create constant column name for scenario
+    #     rename(scenario = input$neon_scenario1) %>% 
+    #     #filter out zeros, depending on scenario
+    #     filter(scenario != 0)
+    #   
+    # })
     
     
     # first species map
     
     
     #palette based on scenario
-    pal <- reactive({
+    pal1 <- reactive({
       colorBin(palette = "RdBu", domain = c(min(neon_spec_data()$scenario, na.rm = TRUE),
                                             abs(min(neon_spec_data()$scenario, na.rm = TRUE))),
                reverse = TRUE)
@@ -1123,25 +1134,52 @@ server <- function(input, output, session) {
     
     output$NEONmap1 <- renderLeaflet({
       leaflet() %>% 
-        
+       
         addWMSTiles(GetURL("USGSTopo"),
-                    group = grp[1], attribution = att, layers = "0") %>% 
+                    group = grp[1], attribution = att, layers = "0") %>%
         addWMSTiles(GetURL("USGSImageryOnly"),
                     group = grp[2], attribution = att, layers = "0") %>%
-        addWMSTiles(GetURL("USGSShadedReliefOnly"),
-                    group = grp[3], attribution = att, layers = "0") %>% 
-        addWMSTiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', 
+        addWMSTiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
                     attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-                    group = "Dark Theme", layers = "0") %>% 
-       
-        addCircleMarkers(data = neon_spec_data(), layerId = ~site,
-                         color = "black",
-                         fillColor = ~pal()(scenario), weight = 1, stroke = TRUE,
-                         radius = 5, fillOpacity = 1,
+                    group = "Dark Theme", layers = "0") %>%
+        addWMSTiles(GetURL("USGSShadedReliefOnly"),
+                    group = grp[3], attribution = att, layers = "0") %>%
+        
+        
+        addCircleMarkers(
+          data = neon_spec_data(),
+          layerId = ~ site,
+          group = "original",
+          color = "black",
+          fillColor = ~ pal1()(scenario),
+          weight = 1,
+          stroke = TRUE,
+          radius = 7,
+          fillOpacity = 1,
+          popup = paste(
+            "Site:",
+            neon_spec_data()$site,
+            "<br>",
+            paste0(input$neon_scenario1, ":"),
+            neon_spec_data()$scenario
+          )
+        ) %>%
+        addCircleMarkers(data = st_jitter(neon_spec_data(), factor = 0.009),
+                         #layerId = ~site,
+                         group = "jitter", color = "black",
+                         fillColor = ~pal1()(scenario), 
+                         weight = 1, stroke = TRUE,
+                         radius = 6, fillOpacity = 1,
                          popup = paste("Site:", neon_spec_data()$site, "<br>",
                                        paste0(input$neon_scenario1, ":"), neon_spec_data()$scenario)
-                         ) %>% 
-          addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", "USGS Imagery", "USGS Shaded Relief"))
+        ) %>%
+          addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", 
+                                          "USGS Imagery", "USGS Shaded Relief"),
+                           position = "bottomleft",
+                           options = layersControlOptions(collapsed = FALSE)
+                           ) %>% 
+        groupOptions("jitter", zoomLevels = 1:6) %>% 
+        groupOptions("original", zoomLevels = 7:20)
     })
     
 
@@ -1212,9 +1250,9 @@ server <- function(input, output, session) {
 
     #read in environmental data (keep same species to use for scatter plot)
     env_data <-  reactive({
-      st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) %>% 
+      st_read(paste0(pathin, "/betPosVis/", input$neon_spec, ".shp")) #%>% 
         #jitter points for plot
-        st_jitter(factor = 0.009)
+        #st_jitter(factor = 0.009)
       
     })
      
@@ -1248,27 +1286,44 @@ server <- function(input, output, session) {
       
     })
     
-    output$NEONmap2 <- renderLeaflet(
+    output$NEONmap2 <- renderLeaflet({
       leaflet() %>% 
         addWMSTiles(GetURL("USGSTopo"),
                     group = grp[1], attribution = att, layers = "0") %>% 
         addWMSTiles(GetURL("USGSImageryOnly"),
                     group = grp[2], attribution = att, layers = "0") %>%
-        addWMSTiles(GetURL("USGSShadedReliefOnly"),
-                    group = grp[3], attribution = att, layers = "0") %>% 
         addWMSTiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', 
                     attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
                     group = "Dark Theme", layers = "0") %>% 
+        addWMSTiles(GetURL("USGSShadedReliefOnly"),
+                    group = grp[3], attribution = att, layers = "0") %>% 
+        
         
         addCircleMarkers(data = neon_env_data(), layerId = ~site,
+                         group = "original",
                          color = "black",
                          fillColor = ~pal2()(variable), weight = 1, stroke = TRUE,
-                         radius = 5, fillOpacity = 1,
+                         radius = 7, fillOpacity = 1,
                          popup = paste("Site:", neon_env_data()$site, "<br>",
                                        paste0(input$neon_env, ":"), neon_env_data()$variable)
         ) %>% 
-        addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", "USGS Imagery", "USGS Shaded Relief"))
-    )
+        addCircleMarkers(data = st_jitter(neon_env_data(), factor = 0.009), #layerId = ~site,
+                         group = "jitter",
+                         color = "black",
+                         fillColor = ~pal2()(variable), weight = 1, stroke = TRUE,
+                         radius = 6, fillOpacity = 1,
+                         popup = paste("Site:", neon_env_data()$site, "<br>",
+                                       paste0(input$neon_env, ":"), neon_env_data()$variable)
+        ) %>% 
+        addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", 
+                                          "USGS Imagery", "USGS Shaded Relief"),
+                           position = "bottomleft",
+                         options = layersControlOptions(collapsed = FALSE)
+        ) %>% 
+        groupOptions("jitter", zoomLevels = 1:6) %>% 
+        groupOptions("original", zoomLevels = 7:20)
+      
+    })
     
     
     output$choose_scatter <- renderPlotly({

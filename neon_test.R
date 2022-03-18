@@ -117,4 +117,23 @@ plot_ly(st_30) %>%
   plotly::layout(yaxis = list(title = "Mean Soil Temperature (celcius)"))
  
 
+#test out points at different zoom levels
+
+
+bf_og <- st_read("data/betPosVis/brachiFumans.shp")
+
+bf_jitter <- bf_og %>% st_jitter(factor = 0.009)
+
+leaflet() %>% 
+  addTiles(group = "a") %>% 
+  addCircleMarkers(data = st_jitter(bf_og, factor = 0.009), color = "black",
+                    weight = 1, stroke = TRUE,
+                   radius = 5, fillOpacity = 1, group = "jitter") %>% 
+    addCircleMarkers(data = bf_og, color = "red",
+                     weight = 1, stroke = TRUE,
+                     radius = 5, fillOpacity = 1, group = "original") %>% 
+  addLayersControl(baseGroups = "a") %>% 
+    groupOptions("jitter", zoomLevels = 1:6) %>% 
+    groupOptions("original", zoomLevels = 7:20)
+
  
