@@ -56,3 +56,43 @@ scen <- joined %>%
   arrange(site) %>% 
   mutate(paired = rep(1:(n() / 2), each = 2))
 
+
+
+# UPDATED DATA ----------------------------------------
+
+
+#abundance over time
+abundance <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv4.rds")
+
+abundance_sub <- time_data$agonolConjun %>% as_tibble()
+
+
+
+#model covariates
+
+covaritates <- readRDS("PBGJAM-ShinyDemo/data/data4CaitlinV3.rds") %>% as_tibble()
+
+
+# trait (name) data
+
+traits <- read_csv("PBGJAM-ShinyDemo/data/traits.csv")
+#filter out beetles
+
+beetles <- traits %>% filter(code6 %in% names(abundance))
+# I think there are duplicates...
+beetles %>% group_by(code6) %>% filter(n() > 1)
+# 8 of them duplicated code names, differing species-level names
+
+# how many species is "UNKN"
+beetles %>% filter(str_detect(code6, "UNKN"))
+# 4 unique, one of them a dup (differing genus name)
+
+#save file with duplicates and unknowns
+
+dups <- beetles %>% group_by(code6) %>% filter(n() > 1)
+
+unkn <- beetles %>% filter(str_detect(code6, "UNKN"))
+
+bind_rows(dups, unkn) %>% write.csv("PBGJAM-ShinyDemo/data/dups_unkn_species.csv")
+
+

@@ -30,6 +30,9 @@ site_dat <- readRDS("data/site_dat.RDS")
 #read in species files
 spec_dat <- readRDS("data/data4Caitlinv2.rds")
 
+#read in combined sp abundance file
+abun_all <- readRDS("data/abun_all.RDS")
+
 #function to read in USGS basemaps
 GetURL <- function(service, host = "basemap.nationalmap.gov") {
   sprintf("https://%s/arcgis/services/%s/MapServer/WmsServer", host, service)
@@ -90,12 +93,63 @@ ui <-
                                                                        "SSP585 Temp Full Effects" = "s2.fullT",
                                                                        "SSP245 Temp Main Effects" = "s1.mainT",
                                                                        "SSP585 Temp Main Effects" = "s2.mainT",
-                                                                       "SSP245 Defecit Change" = "s1_def",
-                                                                       "SSP585 Defecit Change" = "s2_def")
+                                                                       "SSP245 Deficit Change" = "s1_def",
+                                                                       "SSP585 Deficit Change" = "s2_def")
                                                        )))
                                  ),
                                  
-                                 leaflet::leafletOutput("NEONmap2", height = 500)
+                                 leaflet::leafletOutput("NEONmap2", height = 500),
+                                 h5(em("Click a site on the map to view its habitat conditions")),
+                                 h5(strong(textOutput("siteText1"))),
+                                 fluidRow(
+                                 column(4,
+                                        p(strong("Terrain")),
+                                        plotOutput("terrainPNG", height = 200)
+                                        ),
+                                 column(2),
+                                 column(4,
+                                        p(strong("Gap Fraction")),
+                                        plotOutput("gapPNG", height = 200),
+                                        )),
+                                 hr(),
+                                 h5(strong("Site-level Species Comparisons")),
+                                 pickerInput("choose_y_spbar", "Choose Y:",
+                                             choices = list(
+                                               "Current" = "history",
+                                               "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                            "2061-2080" = "ssp245_2061.208_normal",
+                                                            "2081-2100" = "ssp245_2081.21_normal"),
+                                               "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                            "2061-2080" = "ssp585_2061.208_normal",
+                                                            "2081-2100" = "ssp585_2081.21_normal")
+                                             )),
+                                 plotlyOutput("speciesBar"),
+                                 fluidRow(
+                                   column(4,
+                                          pickerInput("choose_x_spscat", "Choose X:",
+                                                      choices = list(
+                                                        "Current" = "history",
+                                                        "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                                     "2061-2080" = "ssp245_2061.208_normal",
+                                                                     "2081-2100" = "ssp245_2081.21_normal"),
+                                                        "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                                     "2061-2080" = "ssp585_2061.208_normal",
+                                                                     "2081-2100" = "ssp585_2081.21_normal")
+                                                      ))),
+                                   column(4,
+                                          pickerInput("choose_y_spscat", "Choose Y:",
+                                                      choices = list(
+                                                        "Current" = "history",
+                                                        "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                                     "2061-2080" = "ssp245_2061.208_normal",
+                                                                     "2081-2100" = "ssp245_2081.21_normal"),
+                                                        "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                                     "2061-2080" = "ssp585_2061.208_normal",
+                                                                     "2081-2100" = "ssp585_2081.21_normal")
+                                                      ),
+                                                      selected = "ssp245_2021.204_normal"))
+                                 ),
+                                 plotlyOutput("speciesScatter")
                           ),
                           column(6,
                                  h3(strong("Explore all variables in 3D space")),
@@ -170,7 +224,7 @@ ui <-
                                                                   "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
                                                       selected = "Abundance_change")),
                                  ),
-                                 plotOutput("vector_plot")
+                                 plotlyOutput("vector_plot")
                          
                         
                             
@@ -443,6 +497,16 @@ server <- function(input, output, session) {
       
     })
     
+    sei_map_jitter <- reactive({
+      sei_plot() %>% 
+        rename(variable = input$map_var) %>% 
+        mutate(site_level = case_when(str_detect(site, "_") ~ substr(site, start = 1, stop = 4),
+                                      str_detect(site, "-") ~ word(site, 1, sep = "\\-")),
+               ID = 1:nrow(.)) %>% 
+        st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
+        st_jitter(factor = 0.009) 
+    })
+    
     #restructure data for scenario plots
     sei_scen <- reactive({
       
@@ -466,9 +530,42 @@ server <- function(input, output, session) {
       
     })
     
+    #bounds object
+    bounds <- reactive({
+      input$NEONmap2_bounds
+    })
+    
+    #filter plot data to map bounds
+    sei_plot_bounds <- reactive({
+      if(is.null(input$NEONmap2_bounds)){
+        sei_plot()
+      } else {
+      sei_plot() %>% 
+        dplyr::filter(lat > bounds()$south &
+                        lat < bounds()$north &
+                        lon < bounds()$east &
+                        lon > bounds()$west)
+      }
+      
+    })
+    
+    sei_scen_bounds <- reactive({
+      if(is.null(input$NEONmap2_bounds)){
+        sei_scen()
+      } else {
+      sei_scen() %>% 
+        dplyr::filter(lat > bounds()$south &
+                        lat < bounds()$north &
+                        lon < bounds()$east &
+                        lon > bounds()$west)
+      }
+      
+      
+    })
     
     
-    # environmental map
+    
+    ## Column 1 -----------------------------------------
     
     pal2 <- reactive({
       
@@ -511,13 +608,13 @@ server <- function(input, output, session) {
                          popup = paste("Site:", sei_map()$site, "<br>",
                                        paste0(input$map_var, ":"), sei_map()$variable)
         ) %>% 
-        addCircleMarkers(data = st_jitter(sei_map(), factor = 0.009), #layerId = ~site,
+        addCircleMarkers(data = sei_map_jitter(), layerId = ~ID,
                          group = "jitter",
                          color = "black",
                          fillColor = ~pal2()(variable), weight = 1, stroke = TRUE,
                          radius = 6, fillOpacity = 1,
-                         popup = paste("Site:", sei_map()$site, "<br>",
-                                       paste0(input$map_var, ":"), sei_map()$variable)
+                         popup = paste("Site:", sei_map_jitter()$site, "<br>",
+                                       paste0(input$map_var, ":"), sei_map_jitter()$variable)
         ) %>% 
         addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", 
                                           "USGS Imagery", "USGS Shaded Relief"),
@@ -530,51 +627,174 @@ server <- function(input, output, session) {
     })
     
     
+    #Add selected site name as header
+    output$siteText1 <- renderText(
+      if(is.null(input$NEONmap2_marker_click)){
+        return(NULL)
+      } else {
+        #input$NEONmap2_marker_click$id
+        plot_click()[1] #need to do this because sei_map_jitter is spatial object
+      })
+    
+    
+    # Add site habitat PNGs and species comparison maps
+    
+    ## get site name from mapclick
+    site_click <- reactive({
+      if(is.numeric(input$NEONmap2_marker_click$id)){
+        sei_map_jitter() %>% 
+          filter(ID == input$NEONmap2_marker_click$id) %>% 
+          select(site_level) %>% 
+          as.character()
+      
+        } else{
+        abun_all %>% 
+          filter(species == input$spec_1) %>% 
+          filter(site == input$NEONmap2_marker_click$id) %>% 
+          select(site_level) %>% 
+          as.character()
+        
+      }
+    })
+    
+    plot_click <- reactive({
+      if(is.numeric(input$NEONmap2_marker_click$id)){
+        sei_map_jitter() %>% 
+          filter(ID == input$NEONmap2_marker_click$id) %>% 
+          select(site) %>% 
+          as.character()
+        
+      } else{
+        abun_all %>% 
+          filter(species == input$spec_1) %>% 
+          filter(site == input$NEONmap2_marker_click$id) %>% 
+          select(site) %>% 
+          as.character()
+        
+      }
+    })
+    
+    
+    #get reactive x and y for highlighted species
+    trace.x1 <- reactive({
+      input$spec_1
+    })
+    
+    trace.y1 <- reactive({
+      abun_all %>% 
+        filter(site == plot_click()[1] & species == trace.x1()) %>%
+        select(input$choose_y_spbar) %>% 
+        as.numeric()
+    })
+    
+    #paste habitat variable png
+    observeEvent(input$NEONmap2_marker_click, {
+      
+      output$terrainPNG <- renderImage({
+          list(
+            src = paste0(
+              "data/habitat_visualization/terrainVis/",
+              substr(plot_click()[1], start = 1, stop = 4),
+              "/", plot_click()[1],
+              ".png"
+            ),
+            width = 200,
+            height = 200
+          )
+        }, deleteFile = FALSE)
+      
+      output$gapPNG <- renderImage({
+        list(
+          src = paste0(
+            "data/habitat_visualization/gapVis/",
+            substr(plot_click()[1], start = 1, stop = 4),
+            "/", plot_click()[1],
+            "_bet_norm_chm.png"
+          ),
+          width = 200,
+          height = 200
+        )
+      }, deleteFile = FALSE)
+      
+      
+      output$speciesBar <- renderPlotly({
+        
+        abun_all %>% 
+          filter(site_level == site_click()) %>% 
+          distinct(site_level, species, .keep_all = TRUE) %>% 
+          mutate(current_color = if_else(species == trace.x1(), "orange", "blue")) %>% 
+          plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", marker = list(color = ~current_color)) %>% 
+          layout(barmode = "overlay",
+                 xaxis = list(categoryorder = "total descending", showticklabels = F)) #%>%
+         # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
+
+      })
+        
+    })
+    
+    
+    
+    
+    ## Column 2 --------------------------------
     output$choose_scatter <- renderPlotly({
       
-      sei_plot() %>% 
+      sei_plot_bounds() %>% 
       
-      plot_ly(x = ~get(input$choose_x), y = ~get(input$choose_y), color = ~get(input$choose_color),
-              size = 4,
+      plot_ly(x = ~get(input$choose_x), y = ~get(input$choose_y), 
+                color = ~get(input$choose_color),
+                size = 4,
+                marker = list(line = list(color = NA, width = 0)),
               hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>"),
               type = "scatter", mode = "markers") %>%
-        plotly::layout(yaxis = list(title = input$choose_y),
-                       xaxis = list(title = input$choose_x)) %>%
-        colorbar(title=input$choose_color)
+        plotly::layout(yaxis = list(title = input$choose_y, 
+                                    range = c(min(sei_plot()[,input$choose_y]), 
+                                              max(sei_plot()[,input$choose_y]))),
+                       xaxis = list(title = input$choose_x, 
+                                    range = c(min(sei_plot()[,input$choose_x]), 
+                                              max(sei_plot()[,input$choose_x])))
+                       ) %>%
+        colorbar(title=input$choose_color, limits = c(min(sei_plot()[,input$choose_color]), max(sei_plot()[,input$choose_color])))
       
     })
     
     
     output$scenario_anim <- renderPlotly({
       
-      sei_scen() %>% 
+      sei_scen_bounds() %>% 
         
         plot_ly(x = ~get(input$choose_x2), y = ~get(input$choose_y2), size = ~get(input$choose_size),
                 frame = ~scenario,
                 hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>"),
                 type = "scatter", mode = "markers") %>%
-        plotly::layout(yaxis = list(title = input$choose_y2),
-                       xaxis = list(title = input$choose_x2)) 
+        plotly::layout(yaxis = list(title = input$choose_y2,
+                                    range = c(min(sei_scen()[,input$choose_y2]), 
+                                              max(sei_scen()[,input$choose_y2]))),
+                       xaxis = list(title = input$choose_x2,
+                                    range = c(min(sei_scen()[,input$choose_x2]), 
+                                              max(sei_scen()[,input$choose_x2])))) 
       
     })
     
-    output$vector_plot <- renderPlot({
+    output$vector_plot <- renderPlotly({
       
-      sei_scen() %>% 
+      ggplotly(sei_scen_bounds() %>% 
         ggplot(aes(x = get(input$choose_x3), y = get(input$choose_y3)))+
         geom_path(aes(group = site), color = "darkgrey",
                   arrow = arrow(length = unit(4, "mm"), ends = "last"), size = 0.75)+
         geom_point(aes(color = scenario), alpha = 0.7, size = 3) +
+          scale_color_manual(values = c("#fcb1a9", "#c21604"))+
         theme_minimal()+
         xlab(input$choose_x3)+
-        ylab(input$choose_y3)+
-        theme(
-          axis.title.x = element_text(size = 16),
-          axis.title.y = element_text(size = 16),
-          legend.title = element_text(size = 16),
-          legend.text = element_text(size = 16)
-        )
+        ylab(input$choose_y3)
+      )
+        # theme(
+        #   axis.title.x = element_text(size = 16),
+        #   axis.title.y = element_text(size = 16),
+        #   legend.title = element_text(size = 16),
+        #   legend.text = element_text(size = 16)
+        # ))
       
+     
       
     })
     
