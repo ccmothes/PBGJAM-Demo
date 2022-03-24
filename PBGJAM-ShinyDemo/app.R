@@ -722,7 +722,7 @@ server <- function(input, output, session) {
         abun_all %>% 
           filter(site_level == site_click()) %>% 
           distinct(site_level, species, .keep_all = TRUE) %>% 
-          mutate(current_color = if_else(species == trace.x1(), "orange", "blue")) %>% 
+          mutate(current_color = if_else(species == trace.x1(), "red", "blue")) %>% 
           plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", marker = list(color = ~current_color)) %>% 
           layout(barmode = "overlay",
                  xaxis = list(categoryorder = "total descending", showticklabels = F)) #%>%
