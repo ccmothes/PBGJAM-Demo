@@ -13,7 +13,7 @@ dat <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv2.rds")
 sub <- dat$agonolConjun
 
 sub %>% as_tibble() %>% 
-plot_ly(x = ~gap.frac.10, y = ~s1, marker = list(color = ~s1.fullT, colorscale = "Inferno", colorbar = list(title = 's1.fullT')),
+plot_ly(x = ~s1.fullT, y = ~s1, marker = list(color = ~s1.fullT, colorscale = "Inferno", colorbar = list(title = 's1.fullT')),
         hovertemplate =  paste(.$plot.ID, "<extra></extra>"),
         type = "scatter", mode = "markers")
 
@@ -162,3 +162,41 @@ ggplotly(p) %>%
       ay=10
     )
   ))
+
+
+
+plot_ly(sub) %>% 
+  add_annotations(x = ~s2.mainT,
+                  y = ~s2,
+                  xref = "x", yref = "y",
+                  axref = "x", ayref = "y",
+                  ax = ~s1.mainT, ay = ~s1,
+                  text = "", showarrow = T, arrowcolor = "gray",
+                  arrowwidth = 1,
+                  opacity = 0.6, arrowsize = 2, arrowhead = 2) %>% 
+  add_markers(~s1.mainT, ~s1) %>% 
+  add_markers(~s2.mainT, ~s2, color = "red")
+
+#try out with scenario formatted data
+## reformat data, select x and y vars and then pivot longer
+
+test <- noquote(paste0("Full_temp_effects", "_s1"))
+anim %>%
+  pivot_wider(names_from = scenario, values_from = c(Abundance_change, Full_temp_effects, Main_temp_effects)) %>%
+  group_by(plot.ID) %>% 
+  summarize(across(contains(c("s1","s2")), ~sum(.x, na.rm = TRUE))) %>% 
+  plot_ly(hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>")) %>% 
+  add_markers(x = as.formula(paste0("~", "Full_temp_effects", "_s1")), ~Abundance_change_s1, marker = list(color = "red", size = 8), name = "SSP245") %>% 
+  add_markers(~Full_temp_effects_s2, ~Abundance_change_s2, marker = list(color = "darkred", size = 8), name = "SSP585") %>% 
+  add_annotations(x = ~Full_temp_effects_s2,
+                  y = ~Abundance_change_s2,
+                  xref = "x", yref = "y",
+                  axref = "x", ayref = "y",
+                  ax = ~Full_temp_effects_s1, ay = ~Abundance_change_s1,
+                  text = "", showarrow = T, arrowcolor = "gray",
+                  arrowwidth = 1,
+                  opacity = 0.6, arrowsize = 2, arrowhead = 5)
+
+
+
+

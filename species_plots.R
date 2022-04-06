@@ -37,26 +37,34 @@ map2_df(abundance, names(abundance), ~mutate(.x, species = .y)) %>%
 #save to use in app
 saveRDS(abun_all, "PBGJAM-ShinyDemo/data/abun_all.RDS")
 
-trace.x <- "scaphiAngust"
-trace.x <- as.numeric(select(filter(abun_all, site_level == "ABBY" & species == "scaphiAngust"), history))
-trace.y <- as.numeric(select(filter(abun_all, site_level == "ABBY" & species == "scaphiAngust"), ssp245_2021.204_normal))
+spec <- "scaphiAngust"
+trace.x <- as.numeric(select(filter(abun_all, site == "ABBY_002" & species == "scaphiAngust"), history))
+trace.y <- as.numeric(select(filter(abun_all, site == "ABBY_002" & species == "scaphiAngust"), ssp245_2021.204_normal))
 
 #now make barplots
 abun_all %>% 
   filter(site_level == "ABBY") %>% 
   distinct(site_level, species, .keep_all = TRUE) %>% 
-  plot_ly(x = ~species, y = ~ssp245_2021.204_normal, type = "bar", name = "All Species") %>% 
-  add_trace(x = trace.x, y = trace.y, type = "bar", name = trace.x, marker = list(color = "orange")) %>% 
+  mutate(current_color = if_else(species == spec, "red", "blue"),
+         test = if_else(species == spec, paste(spec), "All species")) %>% 
+  plot_ly(x = ~species, y = ~ssp245_2021.204_normal, type = "bar", 
+          color = ~current_color, name = ~test) %>% 
+  #add_trace(x = trace.x, y = trace.y, type = "bar", name = trace.x, marker = list(color = "orange")) %>% 
   layout(barmode = "overlay",
          xaxis = list(categoryorder = "total descending", showticklabels = F))
 
 
 #what about scatter with two vars
 abun_all %>% 
-  filter(site_level == "ABBY") %>% 
-  plot_ly(x = ~history, y = ~ssp245_2021.204_normal, type = "scatter", name = 'All species') %>% 
-  add_trace(x = trace.x, y = trace.y, type = "scatter", name = trace.x, marker = list(color = "orange")) %>% 
-  layout(barmode = "overlay",
-         xaxis = list(categoryorder = "total descending", showticklabels = F))
+  filter(site_level == "ABBY") %>%
+  distinct(site_level, species, .keep_all = TRUE) %>% 
+  mutate(current_color = if_else(species == spec, "red", "blue"),
+         name = if_else(species == spec, paste(spec), "All species")) %>% 
+  plot_ly(x = ~history, y = ~ssp245_2021.204_normal,
+          color = ~current_color,
+          name = ~name) #%>% 
+  #add_trace(x = trace.x, y = trace.y, name = "test", marker = list(color = "orange")) %>% 
+  # layout(scattermode = "overlay",
+  #        xaxis = list(categoryorder = "total descending", showticklabels = F))
 
 

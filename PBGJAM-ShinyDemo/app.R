@@ -70,7 +70,7 @@ ui <-
                  ),
              
              # NEON UI --------------------------------------------------------------------
-             tabPanel("Species-Environment Interactions",
+             tabPanel("",
                       fluidPage(
                         fluidRow(
                           column(6,
@@ -78,7 +78,8 @@ ui <-
                                  #br(),
                                  fluidRow(
                                    column(4,
-                                          selectInput("spec_1", label = "Choose Species",
+                                          selectInput("spec_1", 
+                                                      label = HTML("<b>Choose Species</b>"),
                                                       choice = names(spec_dat))),
                                    column(4,
                                           pickerInput("map_var", label = "Color Map By:",
@@ -111,186 +112,197 @@ ui <-
                                         p(strong("Gap Fraction")),
                                         plotOutput("gapPNG", height = 200),
                                         )),
-                                 hr(),
-                                 h5(strong("Site-level Species Comparisons")),
-                                 pickerInput("choose_y_spbar", "Choose Y:",
-                                             choices = list(
-                                               "Current" = "history",
-                                               "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
-                                                            "2061-2080" = "ssp245_2061.208_normal",
-                                                            "2081-2100" = "ssp245_2081.21_normal"),
-                                               "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
-                                                            "2061-2080" = "ssp585_2061.208_normal",
-                                                            "2081-2100" = "ssp585_2081.21_normal")
-                                             )),
-                                 plotlyOutput("speciesBar"),
-                                 fluidRow(
-                                   column(4,
-                                          pickerInput("choose_x_spscat", "Choose X:",
-                                                      choices = list(
-                                                        "Current" = "history",
-                                                        "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
-                                                                     "2061-2080" = "ssp245_2061.208_normal",
-                                                                     "2081-2100" = "ssp245_2081.21_normal"),
-                                                        "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
-                                                                     "2061-2080" = "ssp585_2061.208_normal",
-                                                                     "2081-2100" = "ssp585_2081.21_normal")
-                                                      ))),
-                                   column(4,
-                                          pickerInput("choose_y_spscat", "Choose Y:",
-                                                      choices = list(
-                                                        "Current" = "history",
-                                                        "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
-                                                                     "2061-2080" = "ssp245_2061.208_normal",
-                                                                     "2081-2100" = "ssp245_2081.21_normal"),
-                                                        "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
-                                                                     "2061-2080" = "ssp585_2061.208_normal",
-                                                                     "2081-2100" = "ssp585_2081.21_normal")
-                                                      ),
-                                                      selected = "ssp245_2021.204_normal"))
-                                 ),
-                                 plotlyOutput("speciesScatter")
+                                 hr()
                           ),
-                          column(6,
-                                 h3(strong("Explore all variables in 3D space")),
-                                 fluidRow(
-                                  column(4,
-                                 pickerInput("choose_x", "Choose X:",
-                                             choices = list(
-                                               "Abundance Change" = c("s1", "s2"),
-                                               "Habitat" =c("Gap Fraction" = "gap.frac.10"),
-                                               "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
-                                                             "s1_def", "s2_def", "s1.fullT",
-                                                             "s2.fullT", "s1.mainT", "s2.mainT")
-                                               
-                                             ), selected = "s1_temp")),
-                                 column(4,
-              
-                                 pickerInput("choose_y", "Choose Y:",
-                                             choices = list(
-                                               "Abundance Change" = c("s1", "s2"),
-                                               "Habitat" = c("Gap Fraction" = "gap.frac.10"),
-                                               "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
-                                                             "s1_def", "s2_def", "s1.fullT",
-                                                             "s2.fullT", "s1.mainT", "s2.mainT")),
-                                             selected = "s1_def")),
-                                 column(4,
-                                 pickerInput("choose_color", "Color By: ",
-                                             choices = list(
-                                               "Abundance Change" = c("s1", "s2"),
-                                               "Habitat" =c("Gap Fraction" = "gap.frac.10"),
-                                               "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
-                                                             "s1_def", "s2_def", "s1.fullT",
-                                                             "s2.fullT", "s1.mainT", "s2.mainT")),
-                                             selected = "gap.frac.10"))),
-                                 plotlyOutput("choose_scatter"),
-                                 hr(),
-                                 h3(strong("Scenario Change Animation")),
+                            column(6,
+                                   tabsetPanel(
+                                     tabPanel(
+                                       "Compare Across Sites",
+                                       h3(strong("Explore all variables in 3D space")),
+                                       fluidRow(
+                                         column(4,
+                                                pickerInput("choose_x", "Choose X:",
+                                                            choices = list(
+                                                              "Abundance Change" = c("s1", "s2"),
+                                                              "Habitat" =c("Gap Fraction" = "gap.frac.10"),
+                                                              "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
+                                                                            "s1_def", "s2_def", "s1.fullT",
+                                                                            "s2.fullT", "s1.mainT", "s2.mainT")
+                                                              
+                                                            ), selected = "s1_temp")),
+                                         column(4,
+                                                
+                                                pickerInput("choose_y", "Choose Y:",
+                                                            choices = list(
+                                                              "Abundance Change" = c("s1", "s2"),
+                                                              "Habitat" = c("Gap Fraction" = "gap.frac.10"),
+                                                              "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
+                                                                            "s1_def", "s2_def", "s1.fullT",
+                                                                            "s2.fullT", "s1.mainT", "s2.mainT")),
+                                                            selected = "s1_def")),
+                                         column(4,
+                                                pickerInput("choose_color", "Color By: ",
+                                                            choices = list(
+                                                              "Abundance Change" = c("s1", "s2"),
+                                                              "Habitat" =c("Gap Fraction" = "gap.frac.10"),
+                                                              "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
+                                                                            "s1_def", "s2_def", "s1.fullT",
+                                                                            "s2.fullT", "s1.mainT", "s2.mainT")),
+                                                            selected = "gap.frac.10"))),
+                                       plotlyOutput("choose_scatter"),
+                                       hr(),
+                                       h3(strong("Scenario Change Animation")),
+                                       
+                                       fluidRow(
+                                         column(4,
+                                                pickerInput("choose_x2", "Choose X:",
+                                                            choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
+                                                                        "Temperature_change",
+                                                                        "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
+                                                            selected = "Full_temp_effects")),
+                                         column(4,
+                                                pickerInput("choose_y2", "Choose Y:",
+                                                            choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
+                                                                        "Temperature_change",
+                                                                        "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
+                                                            selected = "Abundance_change")),
+                                         column(4,
+                                                pickerInput("choose_size", "Size Points By: ",
+                                                            choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
+                                                                        "Temperature_change",
+                                                                        "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
+                                                            selected = "gap.frac.10") )
+                                       ),
+                                       plotlyOutput("scenario_anim"),
+                                       hr(),
+                                       h3(strong("Vector Plots")),
+                                       fluidRow(
+                                         column(4,
+                                                pickerInput("choose_x3", "Choose X:",
+                                                            choices = c("Abundance_change",
+                                                                        "Temperature_change",
+                                                                        "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
+                                                            selected = "Full_temp_effects")),
+                                         column(4,
+                                                pickerInput("choose_y3", "Choose Y:",
+                                                            choices = c("Abundance_change",
+                                                                        "Temperature_change",
+                                                                        "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
+                                                            selected = "Abundance_change")),
+                                       ),
+                                       plotlyOutput("vector_plot")
+                                       
+                                     ),
+                                     tabPanel(
+                                       "Compare Across Species",
+                                       h5(strong("Site-level Species Comparisons"),em(" (click a site on the map to view plots)")),
+                                       pickerInput("choose_y_spbar", "Choose Y:",
+                                                   choices = list(
+                                                     "Current" = "history",
+                                                     "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                                  "2061-2080" = "ssp245_2061.208_normal",
+                                                                  "2081-2100" = "ssp245_2081.21_normal"),
+                                                     "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                                  "2061-2080" = "ssp585_2061.208_normal",
+                                                                  "2081-2100" = "ssp585_2081.21_normal")
+                                                   )),
+                                       plotlyOutput("speciesBar"),
+                                       hr(),
+                                       fluidRow(
+                                         column(4,
+                                                pickerInput("choose_x_spscat", "Choose X:",
+                                                            choices = list(
+                                                              "Current" = "history",
+                                                              "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                                           "2061-2080" = "ssp245_2061.208_normal",
+                                                                           "2081-2100" = "ssp245_2081.21_normal"),
+                                                              "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                                           "2061-2080" = "ssp585_2061.208_normal",
+                                                                           "2081-2100" = "ssp585_2081.21_normal")
+                                                            ))),
+                                         column(4,
+                                                pickerInput("choose_y_spscat", "Choose Y:",
+                                                            choices = list(
+                                                              "Current" = "history",
+                                                              "SSP245" = c("2021-2040" = "ssp245_2021.204_normal",
+                                                                           "2061-2080" = "ssp245_2061.208_normal",
+                                                                           "2081-2100" = "ssp245_2081.21_normal"),
+                                                              "SSP585" = c("2021-2040" = "ssp585_2021.204_normal",
+                                                                           "2061-2080" = "ssp585_2061.208_normal",
+                                                                           "2081-2100" = "ssp585_2081.21_normal")
+                                                            ),
+                                                            selected = "ssp245_2021.204_normal"))
+                                       ),
+                                       plotlyOutput("speciesScatter")
 
-                                 fluidRow(
-                                   column(4,
-                                   pickerInput("choose_x2", "Choose X:",
-                                               choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
-                                                           "Temperature_change",
-                                                           "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
-                                                 selected = "Full_temp_effects")),
-                                   column(4,
-                                   pickerInput("choose_y2", "Choose Y:",
-                                               choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
-                                                           "Temperature_change",
-                                                           "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
-                                               selected = "Abundance_change")),
-                                   column(4,
-                                   pickerInput("choose_size", "Size Points By: ",
-                                               choices = c("Abundance_change", "Gap Fraction" = "gap.frac.10", 
-                                                           "Temperature_change",
-                                                           "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
-                                               selected = "gap.frac.10") )
-                                 ),
-                                 plotlyOutput("scenario_anim"),
-                                 hr(),
-                                 h3(strong("Vector Plots")),
-                                 fluidRow(
-                                   column(4,
-                                          pickerInput("choose_x3", "Choose X:",
-                                                      choices = c("Abundance_change",
-                                                                  "Temperature_change",
-                                                                  "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
-                                                      selected = "Full_temp_effects")),
-                                   column(4,
-                                          pickerInput("choose_y3", "Choose Y:",
-                                                      choices = c("Abundance_change",
-                                                                  "Temperature_change",
-                                                                  "Deficit_change", "Full_temp_effects", "Main_temp_effects"),
-                                                      selected = "Abundance_change")),
-                                 ),
-                                 plotlyOutput("vector_plot")
-                         
-                        
-                            
+                                     )
+                                   )
+                                   
                           )
-                        )
-                      )),
-             
-             tabPanel("NEON Sites",
-                      fluidPage(
-                        fluidRow(
-                          column(7,
-                                 
-                                   
-                                   h3(strong("Change in Species Abundance")),
-                                   br(),
-                                   
-                                   fluidRow(  
-                                     column(4,
-                                            selectInput("neon_spec", label = "Choose Species",
-                                                        choices = c("Brachi fumans" = "brachiFumans",
-                                                                    "Pteros femora" = "pterosFemora"))),
-                                     column(4,
-                                            radioButtons("neon_scenario1", label = "Choose Scenario",
-                                                         choices = c("SSP 245" = "s1",
-                                                                     "SSP 585" = "s2")))),
-                                   
-                                   
-                                   leaflet::leafletOutput("NEONmap1", height = 500)
-                                   
-                                   
-                                 ,
-                                 br(),
-                                 br(),
-                                 br(),
-                                 br(),
-                                 br(),
-                                 br(),
-                                 hr(),
-                                 
-                                 
-                          ),
-                          column(5,
-                                 br(),
-                                 br(),
-                                 h5(strong("Click a site on the map to view its habitat conditions")),
-                                 p(em("Note: Only have data for ABBY sites currently")),
-                                 h5(strong(textOutput("siteText"))),
-                                 selectInput("habitatVar", "Choose Habitat Variable",
-                                             choices = c(
-                                               "Terrain" = "terrain",
-                                               "Gap Fraction" = "gf"
-                                             )),
-                                 plotOutput("habitatPNG", height = 200),
-                                 p(strong("NEON Time Series")),
-                                 selectInput("neon_timeVar", "Choose variable",
-                                             choices = "Soil Moisture"),
-                                 #plotly time series output here
-                                 plotlyOutput("neon_timeseries", height = 250),
-                                 br(),
-                                 hr(),
-                                 
-                                 
-                          )
+
                         )
                       )
-             )         
+             )
+             
+             # tabPanel("NEON Sites",
+             #          fluidPage(
+             #            fluidRow(
+             #              column(7,
+             #                     
+             #                       
+             #                       h3(strong("Change in Species Abundance")),
+             #                       br(),
+             #                       
+             #                       fluidRow(  
+             #                         column(4,
+             #                                selectInput("neon_spec", label = "Choose Species",
+             #                                            choices = c("Brachi fumans" = "brachiFumans",
+             #                                                        "Pteros femora" = "pterosFemora"))),
+             #                         column(4,
+             #                                radioButtons("neon_scenario1", label = "Choose Scenario",
+             #                                             choices = c("SSP 245" = "s1",
+             #                                                         "SSP 585" = "s2")))),
+             #                       
+             #                       
+             #                       leaflet::leafletOutput("NEONmap1", height = 500)
+             #                       
+             #                       
+             #                     ,
+             #                     br(),
+             #                     br(),
+             #                     br(),
+             #                     br(),
+             #                     br(),
+             #                     br(),
+             #                     hr(),
+             #                     
+             #                     
+             #              ),
+             #              column(5,
+             #                     br(),
+             #                     br(),
+             #                     h5(strong("Click a site on the map to view its habitat conditions")),
+             #                     p(em("Note: Only have data for ABBY sites currently")),
+             #                     h5(strong(textOutput("siteText"))),
+             #                     selectInput("habitatVar", "Choose Habitat Variable",
+             #                                 choices = c(
+             #                                   "Terrain" = "terrain",
+             #                                   "Gap Fraction" = "gf"
+             #                                 )),
+             #                     plotOutput("habitatPNG", height = 200),
+             #                     p(strong("NEON Time Series")),
+             #                     selectInput("neon_timeVar", "Choose variable",
+             #                                 choices = "Soil Moisture"),
+             #                     #plotly time series output here
+             #                     plotlyOutput("neon_timeseries", height = 250),
+             #                     br(),
+             #                     hr(),
+             #                     
+             #                     
+             #              )
+             #            )
+             #          )
+             # )         
 
 )
     
@@ -530,6 +542,8 @@ server <- function(input, output, session) {
       
     })
     
+
+    
     #bounds object
     bounds <- reactive({
       input$NEONmap2_bounds
@@ -563,7 +577,7 @@ server <- function(input, output, session) {
       
     })
     
-    
+
     
     ## Column 1 -----------------------------------------
     
@@ -616,6 +630,8 @@ server <- function(input, output, session) {
                          popup = paste("Site:", sei_map_jitter()$site, "<br>",
                                        paste0(input$map_var, ":"), sei_map_jitter()$variable)
         ) %>% 
+        addLegend("bottomright", data = sei_map(), values = ~variable, pal = pal2(),
+                  title = input$map_var) %>% 
         addLayersControl(baseGroups = c("Dark Theme", "USGS Topo", 
                                           "USGS Imagery", "USGS Shaded Relief"),
                            position = "bottomleft",
@@ -722,15 +738,41 @@ server <- function(input, output, session) {
         abun_all %>% 
           filter(site_level == site_click()) %>% 
           distinct(site_level, species, .keep_all = TRUE) %>% 
-          mutate(current_color = if_else(species == trace.x1(), "red", "blue")) %>% 
-          plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", marker = list(color = ~current_color)) %>% 
+          mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+                 name = if_else(species == trace.x1(), paste(trace.x1()), "All species")) %>% 
+          plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", 
+                  marker = list(color = ~current_color), name = ~name,
+                  hovertemplate =  paste("%{x},%{y}<br>","<extra></extra>")
+          ) %>% 
           layout(barmode = "overlay",
-                 xaxis = list(categoryorder = "total descending", showticklabels = F)) #%>%
+                 xaxis = list(categoryorder = "total descending", showticklabels = F, title = "Species"),
+                 yaxis = list(title = input$choose_y_spbar)) #%>%
          # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
 
       })
+      
+      output$speciesScatter <- renderPlotly({
+        
+        abun_all %>% 
+          filter(site_level == site_click()) %>% 
+          distinct(site_level, species, .keep_all = TRUE) %>% 
+          mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+                 name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
+                 size = if_else(species == trace.x1(), 12, 7)) %>% 
+          plot_ly(x = ~get(input$choose_x_spscat), y = ~get(input$choose_y_spscat), type = "scatter", mode = "markers",
+                  marker = list(color = ~current_color, size = ~size, line = list(color = NA, width = 0)), name = ~name,
+                  hovertemplate =  paste("%{x},%{y}<br>","Species:", .$species, "<extra></extra>")) %>% 
+           layout(
+                  xaxis = list(title = input$choose_x_spscat),
+                  yaxis = list(title = input$choose_y_spscat)) #%>%
+        # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
+        
+      })
+      
         
     })
+    
+   
     
     
     
@@ -776,25 +818,56 @@ server <- function(input, output, session) {
     })
     
     output$vector_plot <- renderPlotly({
+
+      # ## INTERACTIVE ## THIS WORKS BUT MAKES MAP FILTERING SLOW
+      sei_scen_bounds() %>%
+        pivot_wider(names_from = scenario, values_from = c("Abundance_change", "Full_temp_effects",
+                                                           "Temperature_change", "Deficit_change")) %>%
+        group_by(site) %>%
+        summarize(across(contains(c("s1","s2")), ~sum(.x, na.rm = TRUE))) %>%
+
+        plot_ly(hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>")) %>%
+        add_markers(x = as.formula(paste0("~", as.name(input$choose_x3), "_s1")),
+                    y = as.formula(paste0("~", as.name(input$choose_y3), "_s1")),
+                    marker = list(color = "#ff0000", size = 10, sizemode = "diameter"), opacity = 0.8,  name = "SSP245") %>%
+        add_markers(x = as.formula(paste0("~", as.name(input$choose_x3), "_s2")),
+                    y = as.formula(paste0("~", as.name(input$choose_y3), "_s2")),
+                    marker = list(color = "#850101", size = 10, sizemode = "diameter"), name = "SSP585") %>%
+        add_annotations(x = as.formula(paste0("~", as.name(input$choose_x3), "_s2")),
+                        y = as.formula(paste0("~", as.name(input$choose_y3), "_s2")),
+                        xref = "x", yref = "y",
+                        axref = "x", ayref = "y",
+                        ax = as.formula(paste0("~", as.name(input$choose_x3), "_s1")), ay = as.formula(paste0("~", as.name(input$choose_y3), "_s1")),
+                        text = "", showarrow = T, arrowcolor = "#a19e9d",
+                        arrowwidth = 1,
+                        opacity = 0.8, arrowsize = 2, arrowhead = 5) %>%
+        plotly::layout(yaxis = list(title = input$choose_y3,
+                                    range = c(min(sei_scen()[,input$choose_y3]),
+                                              max(sei_scen()[,input$choose_y3]))),
+                       xaxis = list(title = input$choose_x3,
+                                    range = c(min(sei_scen()[,input$choose_x3]),
+                                              max(sei_scen()[,input$choose_x3]))))
       
-      ggplotly(sei_scen_bounds() %>% 
-        ggplot(aes(x = get(input$choose_x3), y = get(input$choose_y3)))+
-        geom_path(aes(group = site), color = "darkgrey",
-                  arrow = arrow(length = unit(4, "mm"), ends = "last"), size = 0.75)+
-        geom_point(aes(color = scenario), alpha = 0.7, size = 3) +
-          scale_color_manual(values = c("#fcb1a9", "#c21604"))+
-        theme_minimal()+
-        xlab(input$choose_x3)+
-        ylab(input$choose_y3)
-      )
-        # theme(
-        #   axis.title.x = element_text(size = 16),
-        #   axis.title.y = element_text(size = 16),
-        #   legend.title = element_text(size = 16),
-        #   legend.text = element_text(size = 16)
-        # ))
+      ## Static ggplot ##
+      # sei_scen_bounds() %>%
+      #   ggplot(aes(x = get(input$choose_x3), y = get(input$choose_y3)))+
+      #   geom_path(aes(group = site), color = "black",
+      #             arrow = arrow(length = unit(4, "mm"), ends = "last"), size = 1, alpha = 0.5)+
+      #   geom_point(aes(color = scenario), alpha = 0.6, size = 5) +
+      #     scale_color_manual(values = c("#ff0000", "#850101"))+
+      #   theme_minimal()+
+      #   xlab(input$choose_x3)+
+      #   ylab(input$choose_y3)+
+      #   theme(
+      #     axis.title.x = element_text(size = 16),
+      #     axis.title.y = element_text(size = 16),
+      #     legend.title = element_text(size = 16),
+      #     legend.text = element_text(size = 16)
+      #   )
       
      
+      
+      
       
     })
     
