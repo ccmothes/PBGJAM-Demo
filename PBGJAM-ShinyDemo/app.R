@@ -703,7 +703,20 @@ server <- function(input, output, session) {
         as.numeric()
     })
     
-    #paste habitat variable png
+    
+    #reactive dataframe for species plots
+    sp_plot_dat <- reactive({
+      
+      abun_all %>% 
+        mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+               name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
+               size = if_else(species == trace.x1(), 12, 7)) %>% 
+        filter(site_level == site_click()) %>% 
+        distinct(site_level, species, .keep_all = TRUE)
+      
+    })
+    
+    #add all site level info upon click
     observeEvent(input$NEONmap2_marker_click, {
       
       output$terrainPNG <- renderImage({
@@ -732,35 +745,40 @@ server <- function(input, output, session) {
         )
       }, deleteFile = FALSE)
       
-      
       output$speciesBar <- renderPlotly({
         
-        abun_all %>% 
-          filter(site_level == site_click()) %>% 
-          distinct(site_level, species, .keep_all = TRUE) %>% 
-          mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
-                 name = if_else(species == trace.x1(), paste(trace.x1()), "All species")) %>% 
+        # abun_all %>% 
+        #   filter(site_level == site_click()) %>% 
+        #   distinct(site_level, species, .keep_all = TRUE) %>% 
+        #   mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+        #          name = if_else(species == trace.x1(), paste(trace.x1()), "All species")) %>% 
+        sp_plot_dat() %>% 
           plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", 
-                  marker = list(color = ~current_color), name = ~name,
+                  color = ~species == trace.x1(), colors = c("lightblue", "red"), name = ~name,
                   hovertemplate =  paste("%{x},%{y}<br>","<extra></extra>")
           ) %>% 
           layout(barmode = "overlay",
                  xaxis = list(categoryorder = "total descending", showticklabels = F, title = "Species"),
                  yaxis = list(title = input$choose_y_spbar)) #%>%
-         # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
-
+        # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
+        
       })
+      
+      
       
       output$speciesScatter <- renderPlotly({
         
-        abun_all %>% 
-          filter(site_level == site_click()) %>% 
-          distinct(site_level, species, .keep_all = TRUE) %>% 
-          mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
-                 name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
-                 size = if_else(species == trace.x1(), 12, 7)) %>% 
+        # abun_all %>% 
+        #   filter(site_level == site_click()) %>% 
+        #   distinct(site_level, species, .keep_all = TRUE) %>% 
+        #   mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+        #          name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
+        #          size = if_else(species == trace.x1(), 12, 7)) %>%
+        sp_plot_dat() %>% 
           plot_ly(x = ~get(input$choose_x_spscat), y = ~get(input$choose_y_spscat), type = "scatter", mode = "markers",
-                  marker = list(color = ~current_color, size = ~size, line = list(color = NA, width = 0)), name = ~name,
+                  color = ~species == trace.x1(), colors = c("lightblue", "red"),
+                  size = ifelse(.$species == trace.x1(), 12, 7),
+                  line = list(color = NA, width = 0), name = ~name,
                   hovertemplate =  paste("%{x},%{y}<br>","Species:", .$species, "<extra></extra>")) %>% 
            layout(
                   xaxis = list(title = input$choose_x_spscat),
@@ -771,6 +789,7 @@ server <- function(input, output, session) {
       
         
     })
+    
     
    
     
