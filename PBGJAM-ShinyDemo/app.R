@@ -708,9 +708,10 @@ server <- function(input, output, session) {
     sp_plot_dat <- reactive({
       
       abun_all %>% 
-        mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
+        mutate(#current_color = if_else(species == trace.x1(), "red", "lightblue"),
                name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
-               size = if_else(species == trace.x1(), 12, 7)) %>% 
+               #size = if_else(species == trace.x1(), 12, 7)
+               ) %>% 
         filter(site_level == site_click()) %>% 
         distinct(site_level, species, .keep_all = TRUE)
       
