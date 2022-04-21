@@ -58,22 +58,20 @@ scen <- joined %>%
 
 
 
-# UPDATED DATA ----------------------------------------
 
-
-#abundance over time
+# ABUNDANCE AT EACH TIME/SCEN ----------------------------------------
 abundance <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv4.rds")
 
 abundance_sub <- time_data$agonolConjun %>% as_tibble()
 
 
 
-#model covariates
+# HABITAT/CLIM VARS FOR MODEL --------------------------------------------------
 
 covaritates <- readRDS("PBGJAM-ShinyDemo/data/data4CaitlinV3.rds") %>% as_tibble()
 
 
-# trait (name) data
+# TRAIT/NAME DATA -----------------------------------------
 
 traits <- read_csv("PBGJAM-ShinyDemo/data/traits.csv")
 #filter out beetles
@@ -94,5 +92,77 @@ dups <- beetles %>% group_by(code6) %>% filter(n() > 1)
 unkn <- beetles %>% filter(str_detect(code6, "UNKN"))
 
 bind_rows(dups, unkn) %>% write.csv("PBGJAM-ShinyDemo/data/dups_unkn_species.csv")
+
+
+# UPDATED NAME DATA ------------------------------------
+
+spec_names <- readRDS("PBGJAM-ShinyDemo/data/scientific_name.rds") %>% as_tibble() %>% 
+  filter(!(is.na(code6)))
+# 19 species don't have tribe name. 3 of these have UNKN species
+# 7 total have UNKN for species level, but for these the genus name is a tribe name...
+
+#also, 216 in this list, but only 136 with abundance data
+
+
+# FUTURE CLIM VARS -------------------------------------
+## three time frames/ 2 climate scenarios
+
+fut_clim <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv5.rds")
+
+
+
+# UPDATE DATA CLEAN ------------------------------------------------------
+
+
+## site level env vars -------------------
+
+#habitat vars for model
+v3 <- readRDS("PBGJAM-ShinyDemo/data/data4CaitlinV3.rds") %>% as_tibble()
+
+## add _history to all var names for use in 3d plot
+
+#future climate vars
+# NOTE: there are some extra sites in here that do not have abundance or habitat data,
+# for not filter those out
+v5 <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv5.rds") %>% 
+  filter(plot_ID %in% v3$plot.ID) %>% 
+  rename(plot.ID = plot_ID)
+
+
+#spread to join with v3
+v5_spread <- v5 %>% 
+  pivot_wider(names_from = c(scenario, interval), values_from = c(tmean.JJA, def.JJA))
+
+
+site_dat <- left_join(v3, v5_spread, by = "plot.ID")
+
+# get coords to join with site info
+coords <- st_read("data/betPosVis/brachiFumans.shp") %>% 
+  st_drop_geometry() %>% 
+  filter(site %in% site_dat$plot.ID) %>% 
+  select(plot.ID = site, lat, lon)
+
+
+site_dat <- left_join(site_dat, coords, by = "plot.ID")
+
+#SAVE UPDATED VERSION
+saveRDS(site_dat, "PBGJAM-ShinyDemo/data/site_dat_update.RDS")
+
+## species abundance ----------------------------------
+# get total abundance change from v2
+v2 <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv2.rds")
+
+
+# get abundance over time
+v4 <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv4.rds")
+
+#add _abundance tag to all column names to join with site level data
+newnames <- c("plot.ID", paste0(names(v4[[1]][,-1]), "_abundance"))
+v4 <- lapply(v4, setNames, newnames)
+
+
+## see what 3D plot data looks like
+test <- left_join(v4[[1]], site_dat, by = "plot.ID")
+
 
 

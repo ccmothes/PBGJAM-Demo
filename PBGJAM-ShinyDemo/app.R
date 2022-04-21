@@ -24,7 +24,7 @@ pathin <- "data"
 #read in soil temp csv
 st_30 <- read.csv("data/st_30.csv")
 
-# read in site env data
+# read in site env data w/ coords
 site_dat <- readRDS("data/site_dat.RDS")
 
 #read in species files
@@ -120,10 +120,24 @@ ui <-
                                        "Compare Across Sites",
                                        h3(strong("Explore all variables in 3D space")),
                                        fluidRow(
+                                        column(6,
+                                                sliderTextInput("year_3d", label = HTML("<b>Choose a Timeframe:</b>"),
+                                                                                        choices = c("history" = "Current",
+                                                                                                    "2021.204" = "2021-2040",
+                                                                                                    "2061.208" = "2061-2080",
+                                                                                                    "2081.21" = "2081-2100"),
+                                                                                        grid = TRUE)
+                                         ),
+                                        column(4, prettyRadioButtons("scen_3d", label = HTML("<b>Choose Climate Scenario:</b>"),
+                                                          choices = c("SSP 245" = "ssp245", 
+                                                                      "SSP 585" = "ssp585"),
+                                                          inline = TRUE, fill = TRUE)),
+                                      ),
+                                       fluidRow(
                                          column(4,
                                                 pickerInput("choose_x", "Choose X:",
                                                             choices = list(
-                                                              "Abundance Change" = c("s1", "s2"),
+                                                              "Abundance Change" = list("s1", "s2"),
                                                               "Habitat" =c("Gap Fraction" = "gap.frac.10"),
                                                               "Climate" = c("tmean.JJA", "s1_temp", "s2_temp",
                                                                             "s1_def", "s2_def", "s1.fullT",
@@ -151,8 +165,24 @@ ui <-
                                                             selected = "gap.frac.10"))),
                                        plotlyOutput("choose_scatter"),
                                        hr(),
-                                       h3(strong("Scenario Change Animation")),
-                                       
+                                       h3(strong("Explore Change Over Time")),
+                                        fluidRow(
+                                          column(4, prettyRadioButtons("scen_time", label = HTML("<b>Choose Climate Scenario:</b>"),
+                                                                       choices = c("SSP 245" = "ssp245", 
+                                                                                   "SSP 585" = "ssp585"),
+                                                                       inline = TRUE, fill = TRUE)),
+                                        column(6,
+                                               sliderTextInput("year_time", label = HTML("<b>Choose Time Range:</b>"),
+                                                               choices = c("history" = "Current",
+                                                                           "2021.204" = "2021-2040",
+                                                                           "2061.208" = "2061-2080",
+                                                                           "2081.21" = "2081-2100"),
+                                                               grid = TRUE,
+                                                               selected = c("Current", "2081-2100"))
+                                        ),
+                              
+                                      ),
+                                       h5(strong("Animation")),
                                        fluidRow(
                                          column(4,
                                                 pickerInput("choose_x2", "Choose X:",
@@ -175,7 +205,7 @@ ui <-
                                        ),
                                        plotlyOutput("scenario_anim"),
                                        hr(),
-                                       h3(strong("Vector Plots")),
+                                       h5(strong("Vector Plots")),
                                        fluidRow(
                                          column(4,
                                                 pickerInput("choose_x3", "Choose X:",
@@ -673,6 +703,7 @@ server <- function(input, output, session) {
       }
     })
     
+    ## get plot (higher order) name from mapclick
     plot_click <- reactive({
       if(is.numeric(input$NEONmap2_marker_click$id)){
         sei_map_jitter() %>% 
@@ -748,11 +779,6 @@ server <- function(input, output, session) {
       
       output$speciesBar <- renderPlotly({
         
-        # abun_all %>% 
-        #   filter(site_level == site_click()) %>% 
-        #   distinct(site_level, species, .keep_all = TRUE) %>% 
-        #   mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
-        #          name = if_else(species == trace.x1(), paste(trace.x1()), "All species")) %>% 
         sp_plot_dat() %>% 
           plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", 
                   color = ~species == trace.x1(), colors = c("lightblue", "red"), name = ~name,
@@ -769,12 +795,6 @@ server <- function(input, output, session) {
       
       output$speciesScatter <- renderPlotly({
         
-        # abun_all %>% 
-        #   filter(site_level == site_click()) %>% 
-        #   distinct(site_level, species, .keep_all = TRUE) %>% 
-        #   mutate(current_color = if_else(species == trace.x1(), "red", "lightblue"),
-        #          name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
-        #          size = if_else(species == trace.x1(), 12, 7)) %>%
         sp_plot_dat() %>% 
           plot_ly(x = ~get(input$choose_x_spscat), y = ~get(input$choose_y_spscat), type = "scatter", mode = "markers",
                   color = ~species == trace.x1(), colors = c("lightblue", "red"),
@@ -805,7 +825,7 @@ server <- function(input, output, session) {
       plot_ly(x = ~get(input$choose_x), y = ~get(input$choose_y), 
                 color = ~get(input$choose_color),
                 size = 4,
-                marker = list(line = list(color = NA, width = 0)),
+                #marker = list(line = list(width = 0)),
               hovertemplate =  paste("%{x},%{y}<br>","Site:", .$site, "<extra></extra>"),
               type = "scatter", mode = "markers") %>%
         plotly::layout(yaxis = list(title = input$choose_y, 

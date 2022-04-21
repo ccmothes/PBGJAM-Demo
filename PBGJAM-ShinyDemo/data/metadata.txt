@@ -1,16 +1,32 @@
 Metadata for PBGJAM Shinyapp
 
-Data4Caitlinv4.rds: same as before, it will be a list with species. The column is named like: ssp245_2021.204_normal, where ssp245 is the scenario, 2021.204 is the time interval for 2021-2040. It will be three time interval and one historical time interval in total.  
-Data4Caitlinv3.rds: it contains all the covariates we have for the model. (climate + habitat)
-Habitat_visualization.rds: it contains all the pngs for the gapfraction and terrain.
+Habitat_visualization.rds: All the pngs for the gapfraction and terrain.
 Traits.csv: code 6 is the species code name for the element in the list, you can match its genus, full species name, family, and tribe using different columns.
-data4Caitlinv2.rds: 
+	UPDATE: species_names: fixed NA's/duplicates. now 216 unique species names with Tribe
+
+data4CaitlinV2.rds: Units for all (except gap fraction) are counts/trap night
 	Plot.ID :         name of the plot that match with the data/coordinate I send you before
-	S1:               abundance change for SSP245
-	S2:               abundance change for SSP585
-	Gap.frac.10: 	gap fraction by plot
-	Tmean.JJA:   temperature in summer
-	S1.mainT:     main effects of temperature on abundance change for SSP245
-	S2.mainT:     main effects of temperature on abundance change for SSP585
+	S1:               abundance change for SSP245 (hisoric - 208.21)
+	S2:               abundance change for SSP585 (historic - 208.21)
+	Gap.frac.10: 	  gap fraction by plot
+	Tmean.JJA:   	 temperature in summer
+	S1.mainT:     	main effects of temperature on abundance change for SSP245
+	S2.mainT:    	main effects of temperature on abundance change for SSP585
 	S1.fullT:        full effects of temperature on abundance change for SSP245
 	S2.fullT:        full effects of temperature on abundance change for SSP585
+	NOTE: S1 = historic - 208.21 SSP245 and S2 = historic - 208.21 SSP585
+	
+Data4Caitlinv3.rds: All the (historical) covariates used to train the model. (climate + habitat)
+	Gap.frac.10: gap fraction
+	s.roughness: surface roughness
+	Nitrogen.mean: canopy nitrogen
+	Cec30: cation exchange capacity
+	Nrd.15cm.2m: understory density
+	CwdVolume.sqrt: coarse woody debris
+	Def.JJA: summer moisture deficit (from June, July, and August)
+	Tmean.JJA: summer temperature (from June, July, and August)
+
+Data4Caitlinv4.rds: Modeled abundance for each time/climate scenario. The column is named like: ssp245_2021.204_normal, where ssp245 is the scenario, 2021.204 is the time interval for 2021-2040. It will be three time interval and one historical time interval in total.  
+	Time frames: histrical (current), 2021-2040; 2061-2080; 2081-2100.
+	
+Data4CaitlinV5.rds: Future climate variables for summer temp and summer deficit for 3 time frames/scenario
