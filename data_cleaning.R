@@ -97,7 +97,11 @@ bind_rows(dups, unkn) %>% write.csv("PBGJAM-ShinyDemo/data/dups_unkn_species.csv
 # UPDATED NAME DATA ------------------------------------
 
 spec_names <- readRDS("PBGJAM-ShinyDemo/data/scientific_name.rds") %>% as_tibble() %>% 
-  filter(!(is.na(code6)))
+  filter(code6 %in% names(spec_dat))%>% 
+  mutate(tribe = case_when(tribe == "" ~ "Unknown", 
+                           tribe == "Carabini " ~ "Carabini",
+                           tribe == "Harpalini " ~ "Harpalini",
+                           TRUE ~ tribe))
 # 19 species don't have tribe name. 3 of these have UNKN species
 # 7 total have UNKN for species level, but for these the genus name is a tribe name...
 
@@ -145,10 +149,18 @@ coords <- st_read("data/betPosVis/brachiFumans.shp") %>%
 
 site_dat <- left_join(site_dat, coords, by = "plot.ID")
 
+#create new columns for def and temp dif
+site_dat <- site_dat %>% 
+  mutate(dif_def_ssp245 = def.JJA_ssp245_2081.21 - def.JJA,
+         dif_def_ssp585 = def.JJA_ssp585_2081.21 - def.JJA,
+         dif_tmean_ssp245 = tmean.JJA_ssp245_2081.21 - tmean.JJA,
+         dif_tmean_ssp585 = tmean.JJA_ssp585_2081.21 - tmean.JJA)
+
 #SAVE UPDATED VERSION
 saveRDS(site_dat, "PBGJAM-ShinyDemo/data/site_dat_update.RDS")
 
 ## species abundance ----------------------------------
+
 # get total abundance change from v2
 v2 <- readRDS("PBGJAM-ShinyDemo/data/data4Caitlinv2.rds")
 
@@ -161,8 +173,21 @@ newnames <- c("plot.ID", paste0(names(v4[[1]][,-1]), "_abundance"))
 v4 <- lapply(v4, setNames, newnames)
 
 
-## see what 3D plot data looks like
-test <- left_join(v4[[1]], site_dat, by = "plot.ID")
+## rename v2 columns and combine to create new spec_dat file
+newnames2 <- c("plot.ID", "dif_abundance_ssp245", "dif_abundance_ssp585",
+               "fullT_ssp245", "fullT_ssp585",
+               "mainT_ssp245", "mainT_ssp585")
+v2_update <- lapply(v2, dplyr::select, -c(gap.frac.10, tmean.JJA)) %>% 
+  lapply(setNames, newnames2)
+
+# check that all the names/order of list match
+names(v4) == names(v2_update)
+
+spec_dat <- purrr::map2(v4, v2_update, full_join, by = "plot.ID")
+
+#save as updated file
+saveRDS(spec_dat, "PBGJAM-ShinyDemo/data/spec_dat_update.RDS")
+
 
 
 

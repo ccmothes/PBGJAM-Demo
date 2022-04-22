@@ -30,8 +30,22 @@ site_dat <- readRDS("data/site_dat.RDS")
 #read in species files
 spec_dat <- readRDS("data/data4Caitlinv2.rds")
 
+#read in species names and spec_group info
+spec_names <- readRDS("data/scientific_name.rds") %>% as_tibble() %>% 
+  filter(code6 %in% names(spec_dat)) %>% 
+  mutate(tribe = case_when(tribe == "" ~ "Unknown", 
+                           tribe == "Carabini " ~ "Carabini",
+                           tribe == "Harpalini " ~ "Harpalini",
+                           TRUE ~ tribe))
+
+#get spec_group names for select input
+spec_group <- spec_names %>% 
+  arrange(tribe, decending = TRUE) %>% 
+  pull(tribe) %>% unique()
+
 #read in combined sp abundance file
-abun_all <- readRDS("data/abun_all.RDS")
+abun_all <- readRDS("data/abun_all.RDS") %>% 
+  left_join(select(spec_names, species = code6, species_full = species), by = "species")
 
 #function to read in USGS basemaps
 GetURL <- function(service, host = "basemap.nationalmap.gov") {
@@ -64,7 +78,7 @@ ui <-
                    #bg = "#FFFFFF",
                    #fg = "#000",
                    #primary = "#082466",
-                   secondary = "#fafaf5",
+                   secondary = "#fafaf5"
                    #success = "#f28e35",
                    #base_font = font_google("Cairo")
                  ),
@@ -78,9 +92,33 @@ ui <-
                                  #br(),
                                  fluidRow(
                                    column(4,
-                                          selectInput("spec_1", 
+                                          pickerInput("spec_1", 
                                                       label = HTML("<b>Choose Species</b>"),
-                                                      choice = names(spec_dat))),
+                                                      choices = list(
+                                                        "Amblycheilini" = list(pull(select(filter(spec_names, tribe == spec_group[1]), species))),
+                                                        "Bembidiini" = list(pull(select(filter(spec_names, tribe == spec_group[2]), species))),
+                                                        "Brachinini" = pull(select(filter(spec_names, tribe == spec_group[3]), species)),
+                                                        "Broscini" = list(pull(select(filter(spec_names, tribe == spec_group[4]), species))),
+                                                        "Carabini" = pull(select(filter(spec_names, tribe == spec_group[5]), species)),
+                                                        "Chlaeniini" = pull(select(filter(spec_names, tribe == spec_group[6]), species)),
+                                                        "Cicindelini" = pull(select(filter(spec_names, tribe == spec_group[7]), species)),
+                                                        "Cychrini" = pull(select(filter(spec_names, tribe == spec_group[8]), species)),
+                                                        "Cyclosomini" = list(pull(select(filter(spec_names, tribe == spec_group[9]), species))),
+                                                        "Dyschiriini" = list(pull(select(filter(spec_names, tribe == spec_group[10]), species))),
+                                                        "Galeritini" = list(pull(select(filter(spec_names, tribe == spec_group[11]), species))),
+                                                        "Harpalini" = pull(select(filter(spec_names, tribe == spec_group[12]), species)),
+                                                        "Lebiini" = pull(select(filter(spec_names, tribe == spec_group[13]), species)),
+                                                        "Licinini" = pull(select(filter(spec_names, tribe == spec_group[14]), species)),
+                                                        "Megacephalini" = list(pull(select(filter(spec_names, tribe == spec_group[15]), species))),
+                                                        "Pasimachini" = pull(select(filter(spec_names, tribe == spec_group[16]), species)),
+                                                        "Platynini" = pull(select(filter(spec_names, tribe == spec_group[17]), species)),
+                                                        "Pterostichini" = pull(select(filter(spec_names, tribe == spec_group[18]), species)),
+                                                        "Scaritini" = pull(select(filter(spec_names, tribe == spec_group[19]), species)),
+                                                        "Sphodrini" = pull(select(filter(spec_names, tribe == spec_group[20]), species)),
+                                                        "Unknown" = pull(select(filter(spec_names, tribe == spec_group[21]), species)),
+                                                        "Zabrini" = pull(select(filter(spec_names, tribe == spec_group[22]), species))
+
+                                                      ))),
                                    column(4,
                                           pickerInput("map_var", label = "Color Map By:",
                                                        choices = list(
@@ -110,7 +148,7 @@ ui <-
                                  column(2),
                                  column(4,
                                         p(strong("Gap Fraction")),
-                                        plotOutput("gapPNG", height = 200),
+                                        plotOutput("gapPNG", height = 200)
                                         )),
                                  hr()
                           ),
@@ -524,7 +562,7 @@ server <- function(input, output, session) {
     # filter species data and join with site data
    
     sei_plot <- reactive({
-      spec_dat[[input$spec_1]] %>% 
+      spec_dat[[spec_names$code6[spec_names$species == input$spec_1]]] %>% 
         as_tibble() %>% 
         rename(site = plot.ID) %>% 
         left_join(site_dat, by = "site")
@@ -740,7 +778,7 @@ server <- function(input, output, session) {
       
       abun_all %>% 
         mutate(#current_color = if_else(species == trace.x1(), "red", "lightblue"),
-               name = if_else(species == trace.x1(), paste(trace.x1()), "All species"),
+               name = if_else(species_full == trace.x1(), paste(trace.x1()), "All species"),
                #size = if_else(species == trace.x1(), 12, 7)
                ) %>% 
         filter(site_level == site_click()) %>% 
@@ -780,8 +818,8 @@ server <- function(input, output, session) {
       output$speciesBar <- renderPlotly({
         
         sp_plot_dat() %>% 
-          plot_ly(x = ~species, y = ~get(input$choose_y_spbar), type = "bar", 
-                  color = ~species == trace.x1(), colors = c("lightblue", "red"), name = ~name,
+          plot_ly(x = ~species_full, y = ~get(input$choose_y_spbar), type = "bar", 
+                  color = ~species_full == trace.x1(), colors = c("lightblue", "red"), name = ~name,
                   hovertemplate =  paste("%{x},%{y}<br>","<extra></extra>")
           ) %>% 
           layout(barmode = "overlay",
@@ -797,10 +835,10 @@ server <- function(input, output, session) {
         
         sp_plot_dat() %>% 
           plot_ly(x = ~get(input$choose_x_spscat), y = ~get(input$choose_y_spscat), type = "scatter", mode = "markers",
-                  color = ~species == trace.x1(), colors = c("lightblue", "red"),
-                  size = ifelse(.$species == trace.x1(), 12, 7),
+                  color = ~species_full == trace.x1(), colors = c("lightblue", "red"),
+                  size = ifelse(.$species_full == trace.x1(), 12, 7),
                   line = list(color = NA, width = 0), name = ~name,
-                  hovertemplate =  paste("%{x},%{y}<br>","Species:", .$species, "<extra></extra>")) %>% 
+                  hovertemplate =  paste("%{x},%{y}<br>","Species:", .$species_full, "<extra></extra>")) %>% 
            layout(
                   xaxis = list(title = input$choose_x_spscat),
                   yaxis = list(title = input$choose_y_spscat)) #%>%
