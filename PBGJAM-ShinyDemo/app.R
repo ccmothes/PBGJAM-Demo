@@ -650,7 +650,12 @@ server <- function(input, output, session) {
         pivot_wider(names_from = var, values_from = value) %>% 
         group_by(plot.ID, scenario, time) %>% 
         summarise(across(c("abundance", "tmean", "def"), ~sum(.x, na.rm = TRUE)), across()) %>% 
-        mutate(time = factor(time, levels = c("history", "2021.204", "2061.208", "2081.21"))) #%>%
+        mutate(time = factor(time, levels = c("history", "2021.204", "2061.208", "2081.21")),
+               time_label = case_when(time == "history" ~ "Current",
+                                      time == "2021.204" ~ "2021-2040",
+                                      time == "2061.208" ~ "2061-2080",
+                                      time == "2081.21" ~ "2081-2100"),
+               time_label = factor(time_label, c("Current", "2021-2040", "2061-2080", "2081-2100"))) #%>%
         #arrange(plot.ID) %>% 
         #mutate(paired = rep(1:(n() / 2), each = 2))
       
@@ -1031,15 +1036,16 @@ server <- function(input, output, session) {
          #filter(time %in% c(input$year_time[1], input$year_time[2])) %>%
           filter(scenario %in% c("history", input$scen_time)) %>% 
           plot_ly(x = ~get(input$choose_x2), y = ~get(input$choose_y2), size = ~get(input$choose_size),
-                  frame = ~time,
+                  frame = ~time_label,
                   hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>"),
                   type = "scatter", mode = "markers") %>%
-          plotly::layout(yaxis = list(title = input$choose_y2,
+          plotly::layout(yaxis = list(title = names(choiceVal2)[choiceVal2 == input$choose_y2],
                                       range = c(min(sei_scen()[,input$choose_y2]), 
                                                 max(sei_scen()[,input$choose_y2]))),
-                         xaxis = list(title = input$choose_x2,
+                         xaxis = list(title = names(choiceVal2)[choiceVal2 == input$choose_x2],
                                       range = c(min(sei_scen()[,input$choose_x2]), 
-                                                max(sei_scen()[,input$choose_x2])))) 
+                                                max(sei_scen()[,input$choose_x2])))) %>% 
+        animation_slider(currentvalue = list(prefix = "Timeframe:"))
         
         
       
@@ -1129,10 +1135,10 @@ server <- function(input, output, session) {
                         text = "", showarrow = T, arrowcolor = "black",
                         arrowwidth = 1,
                         opacity = 0.5, arrowsize = 2, arrowhead = 5) %>%
-        plotly::layout(yaxis = list(title = input$choose_y3,
+        plotly::layout(yaxis = list(title = names(choiceVal2)[choiceVal2 == input$choose_y3],
                                     range = c(min(sei_scen()[,input$choose_y3]),
                                               max(sei_scen()[,input$choose_y3]))),
-                       xaxis = list(title = input$choose_x3,
+                       xaxis = list(title = names(choiceVal2)[choiceVal2 == input$choose_x3],
                                     range = c(min(sei_scen()[,input$choose_x3]),
                                               max(sei_scen()[,input$choose_x3])))) 
       ## Static ggplot ##
