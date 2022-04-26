@@ -120,7 +120,7 @@ ui <-
                                                         "Unknown" = pull(select(filter(spec_names, tribe == spec_group[21]), species)),
                                                         "Zabrini" = pull(select(filter(spec_names, tribe == spec_group[22]), species))
 
-                                                      ))),
+                                                      ), selected = "Agonoleptus conjunctus")),
                                    column(4,
                                           pickerInput("map_var", label = HTML("<b>Color Map By:</b>"),
                                                        choices = list(
@@ -138,7 +138,7 @@ ui <-
                                                                        "Moisture Deficit" = "def"),
                                                          "Temperature Effects on Abundance Change" = c("Main Effects" = "mainT",
                                                                                                        "FUll effects" = "fullT")
-                                                       ))),
+                                                       ), selected = "abundance")),
                                    column(4, prettyRadioButtons("scen_map", label = HTML("<b>Choose scenario for predicted values:</b>"),
                                                                 choices = c("SSP 245" = "ssp245", 
                                                                             "SSP 585" = "ssp585"),
@@ -717,6 +717,13 @@ server <- function(input, output, session) {
     
     ## Column 1 -----------------------------------------
     
+    
+    # get species-specific value range for color palette
+    range <- reactive({
+      max(max(sei_map()$variable, na.rm = TRUE), abs(min(sei_map()$variable, na.rm = TRUE)))
+      
+    })
+    
     pal2 <- reactive({
       
       if(input$map_var == "gap.frac.10"){
@@ -724,8 +731,8 @@ server <- function(input, output, session) {
       } 
       
       else if(input$map_var == "abundance"){
-        colorBin(palette = "RdBu", domain = c(min(sei_map()$variable, na.rm = TRUE),
-                                              max(sei_map()$variable, na.rm = TRUE)),
+        colorBin(palette = "RdBu", domain = c(-range(),
+                                              range()),
                  reverse = TRUE)
       } else if(input$map_var == "def"){
         colorBin(palette = "RdBu", domain = c(-max(sei_map()$variable, na.rm = TRUE),
