@@ -189,5 +189,32 @@ spec_dat <- purrr::map2(v4, v2_update, full_join, by = "plot.ID")
 saveRDS(spec_dat, "PBGJAM-ShinyDemo/data/spec_dat_update.RDS")
 
 
+## create file format for scenario plot ---------------------
+
+site_dat <- readRDS("PBGJAM-ShinyDemo/data/site_dat_update.RDS")
+spec_dat <- readRDS("PBGJAM-ShinyDemo/data/spec_dat_update.RDS")
+
+dat_test <- spec_dat[[1]] %>% 
+  as_tibble() %>% 
+  left_join(site_dat, by = "plot.ID")
 
 
+scen <- dat_test %>% 
+  #remove difference/change columns
+  select(-contains(c("dif", "mainT", "fullT"))) %>% 
+  rename(def_history = def.JJA, tmean_history = tmean.JJA) %>% 
+  pivot_longer(cols = contains(c("ssp", "history"))) %>% 
+  mutate(scenario = case_when(str_detect(name, "ssp245") ~ "ssp245",
+                              str_detect(name, "ssp585") ~ "ssp585",
+                              str_detect(name, "history") ~ "history"),
+         time = case_when(str_detect(name, "history") ~ "history",
+                          str_detect(name, "2021.204") ~ "2021.204",
+                          str_detect(name, "2061.208") ~ "2061.208",
+                          str_detect(name, "2081.21") ~ "2081.21"),
+         var = case_when(str_detect(name, "abundance") ~ "abundance",
+                         str_detect(name, "tmean") ~ "tmean",
+                         str_detect(name, "def") ~ "def")) %>% 
+  pivot_wider(names_from = var, values_from = value) %>% 
+  group_by(plot.ID, scenario, time) %>% 
+  summarise(across(c("abundance", "tmean", "def"), ~sum(.x, na.rm = TRUE)), across()) %>% 
+  mutate(time = factor(time, levels = c("history", "2021.204", "2061.208", "2081.21")))

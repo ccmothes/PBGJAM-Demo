@@ -60,6 +60,20 @@ anim %>%
   layout(showlegend = FALSE) 
 
 
+scen %>% 
+  #filter(time %in% c("history", "2081.21")) %>% 
+  plot_ly(x = ~tmean, y = ~abundance, size = ~gap.frac.10,
+          frame = ~time,
+          hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>"),
+          type = "scatter", mode = "markers") %>%
+  plotly::layout(yaxis = list(title = input$choose_y2,
+                              range = c(min(sei_scen()[,input$choose_y2]), 
+                                        max(sei_scen()[,input$choose_y2]))),
+                 xaxis = list(title = input$choose_x2,
+                              range = c(min(sei_scen()[,input$choose_x2]), 
+                                        max(sei_scen()[,input$choose_x2])))) 
+
+
 # try gganimate
 # library(gganimate)
 # 
