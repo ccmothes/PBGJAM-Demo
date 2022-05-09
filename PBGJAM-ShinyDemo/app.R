@@ -305,6 +305,7 @@ ui <-
                                      tabPanel(
                                        "Compare Across Species",
                                        h5(strong("Site-level Species Comparisons"),em(" (click a site on the map to view plots)")),
+                                       HTML("<p style = color:#538b01> Note: Abundance units are counts per trap night"),
                                        pickerInput("choose_y_spbar", "Choose Y:",
                                                    choices = list(
                                                      "Current" = "history",
@@ -716,6 +717,15 @@ server <- function(input, output, session) {
     choiceVal2 <- c("Abundance" = "abundance",
                     "Temperature" = "tmean",
                     "Moisture Deficit" = "def")
+    
+    
+    choiceSpec <- c("Current Abundance" = "history",
+                    "2021-2040 SSP 245 Abundance" = "ssp245_2021.204_normal",
+                    "2061-2080 SSP 245 Abundance" = "ssp245_2061.208_normal",
+                    "2081-2100 SSP 245 Abundance" = "ssp245_2081.21_normal",
+                    "2021-2040 SSP 585 Abundance" = "ssp585_2021.204_normal",
+                    "2061-2080 SSP 585 Abundance" = "ssp585_2061.208_normal",
+                    "2081-2100 SSP 585 Abundance" = "ssp585_2081.21_normal")
                     
     
 
@@ -913,7 +923,7 @@ server <- function(input, output, session) {
           ) %>% 
           layout(barmode = "overlay",
                  xaxis = list(categoryorder = "total descending", showticklabels = F, title = "Species"),
-                 yaxis = list(title = input$choose_y_spbar),
+                 yaxis = list(title = names(choiceSpec)[choiceSpec == input$choose_y_spbar]),
                  legend = list(orientation = "h", x = 0.7, y = 1)) #%>%
         # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
         
@@ -930,8 +940,8 @@ server <- function(input, output, session) {
                   line = list(color = NA, width = 0), name = ~name,
                   hovertemplate =  paste("%{x},%{y}<br>","Species:", .$species_full, "<extra></extra>")) %>% 
            layout(
-                  xaxis = list(title = input$choose_x_spscat),
-                  yaxis = list(title = input$choose_y_spscat),
+                  xaxis = list(title = names(choiceSpec)[choiceSpec == input$choose_x_spscat]),
+                  yaxis = list(title = names(choiceSpec)[choiceSpec == input$choose_y_spscat]),
                   legend = list(orientation = "h", x = 0.7, y = 1)) #%>%
         # add_trace(x = trace.x1(), y = trace.y1(), type = "bar", name = trace.x1(), marker = list(color = "orange")) 
         
