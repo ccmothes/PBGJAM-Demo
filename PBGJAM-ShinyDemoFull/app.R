@@ -133,6 +133,88 @@ ui <-
              ) %>% 
                bslib::bs_add_rules(sass::sass_file("www/style.scss")),
              
+             ## Homepage -------------------------------------------------------
+             tabPanel("Home", class = "home",
+                      tags$head(
+                        tags$link(rel = "stylesheet", type = "text/css", href = "homepage.css")
+                      ),
+                      
+                      fluidRow(class = 'header',
+                               column(4,
+                               h1("Biodiversity habitats in transition: big data offer insights
+                                  for species and communities"),
+                               p("We apply the latest advancements in technology and statistics to forecast the
+                                 effects of a changing climate on the abundance and distribution of America's wildlife")),
+                               tags$img(src='wave-bottom.svg', align= 'bottom', width='100%'),
+                               
+                                       
+                      ),
+                      fluidRow(class = "logo",
+                               column(3, tags$img(src= 'nasa.jpeg',
+                                                  title='NASA logo',
+                                                  height='65px'), align = 'center'),
+                               column(3, tags$img(src= 'duke.png',
+                                                  title='Duke logo',
+                                                  height='65px'), align = 'center'),
+                               column(3, tags$img(src= 'nsf.png',
+                                                  title='NSF logo',
+                                                  height='65px'), align = 'center'),
+                               column(3, tags$img(src= 'neon.png',
+                                                  title='NEON logo',
+                                                  height='65px'), align = 'center')),
+                      fluidRow(class = "title",
+                               p(strong("PREDICTING BIODIVERSITY WITH GENERALIZED JOINT ATTRIBUTE MODELS")),
+                               h3("With the support of NASA, we use satellites to monitor our changing planet,
+                                  and through the National Ecological Observatory Network (NEON), we
+                                  track how these changes will impact North America's species and wildlife communities"),
+                               br(),
+                               h3("We offer online tools and maps to explore these changes, and the option
+                                  to download this information for your own use")),
+                      fluidRow(class = "research",
+                               fluidRow(class = "split",
+                               p(strong("MAPS AND MODELS")),
+                               h2("Explore Our Research")),
+                               p("Our maps are based on advances in Bayesian modeling, and unique in
+                                 their focus on critical habitat. Below, you can dive under the hood of
+                                 the maps and explore the model specifics or explore the maps by
+                                 species taxa."),
+                               br(),
+                               column(2, tags$img(src= 'beetles.png',
+                                                  title='Beetle photo',
+                                                  height='150px'), align = 'center',
+                                      h5("Beetles")),
+                               column(1),
+                               column(2, tags$img(src= 'birds.png',
+                                                  title='Bird photo',
+                                                  height='150px'), align = 'center',
+                                      h5("Birds")),
+                               column(1),
+                               column(2, tags$img(src= 'mammals.png',
+                                                  title='Mammal photo',
+                                                  height='150px'), align = 'center',
+                                      h5("Mammals")),
+                               column(1),
+                               column(2, tags$img(src= 'trees.png',
+                                                  title='Tree photo',
+                                                  height='150px'), align = 'center',
+                                      h5("Trees"))),
+                      fluidRow(class = "data",
+                               fluidRow(class = "split2",
+                               p(strong("SUSTAINABLE SCIENCE")),
+                               h2("Our Data Streams")),
+                               p("Long-term studies are drivers of scientific innovation. Combining
+                                 the resources of NASA with those of the National Ecological Observatory
+                                 Network and other open source data sets and citizen science projects,
+                                 we can better predict the impacts of climate change on our country and
+                                 world."),
+                               tabsetPanel(type = "tabs",
+                                           tabPanel("Remote Sensing Data"),
+                                           tabPanel("Biodiversity Data"),
+                                           tabPanel("Climate Data"))
+
+                      )
+                      ),
+             
              ## neon --------------------------------------------------------------------
              tabPanel("NEON Sites",
                       fluidPage(

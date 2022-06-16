@@ -1,0 +1,203 @@
+/* Get a fancy font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
+
+
+/* overriding bootstrap */
+.container-fluid,
+.navbar{
+    width: 100%;
+    padding: 0 auto !important;
+    margin:0 auto !important;
+}
+
+/* header background image */
+div.row.header {
+    background-image: url(bird_background.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    height: 63em;
+}
+
+/*header text*/
+.header h1{
+  color: white;
+  margin-top: 1em;
+  margin-left: 0.75em;
+    margin-bottom: 1em;
+    margin-right: -5em;
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 44px;
+    line-height: 56px;
+    font-weight: 500;
+}
+
+.header p {
+  font-family: Roboto, sans-serif;
+  color: white;
+  margin-left: 2em;
+  margin-right: -4em;
+  font-size: 18px;
+
+}
+
+
+/* logo row margins*/
+.logo {
+  margin-top: 20px;
+  margin-bottom: 50px;
+}
+
+/* propoerties of intro text*/
+
+.title {
+  padding-right: 200px;
+  padding-left: 200px;
+  text-align: center !important;
+}
+
+.title p, h3 {
+  padding: 15px;
+  text-align: center;
+  margin: auto;
+}
+
+.title strong{
+  /*display: inline-block;*/
+    margin-bottom: 10px;
+    padding: 4px 7px 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(98, 209, 248, 0.2);
+    color: #001a57;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* properties of explore research section*/
+
+.research {
+  padding-right: 200px;
+  padding-left: 200px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+
+}
+
+.research p, h2 {
+  padding: 15px;
+  text-align: center;
+  margin: auto;
+}
+
+.research h2 {
+  color: #30364d;
+  font-family: 'Fira Sans', sans-serif;
+  font-weight: 500;
+}
+
+.research p {
+  color: #798099;
+  font-family: Roboto, sans-serif;
+}
+
+/* add shaddow to buttons */
+div.col-sm-2 {
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 15px 30px 0 rgb(48 54 77 / 10%);
+    color: #30364d;
+    text-align: center;
+    margin-left: auto;
+}
+
+
+
+/* had to put first two text elements in separate div to stack them */
+.split {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin: auto;
+
+}
+
+
+.research strong{
+  /*display: inline-block;*/
+    margin-bottom: 10px;
+    padding: 4px 7px 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(98, 209, 248, 0.2);
+    color: #001a57;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+/* data streams properties */
+
+.data {
+  padding-right: 200px;
+  padding-left: 200px;
+  text-align: center !important;
+}
+
+.data p, h2 {
+  padding: 15px;
+  text-align: center;
+  margin: auto;
+}
+
+.data h2 {
+  color: #30364d;
+  font-family: 'Fira Sans', sans-serif;
+  font-weight: 500;
+}
+
+.data p {
+  color: #798099;
+  font-family: Roboto, sans-serif;
+}
+
+/* had to put first two text elements in separate div to stack them */
+.split2 {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin: auto;
+
+}
+
+
+.data strong{
+  /*display: inline-block;*/
+    margin-bottom: 10px;
+    padding: 4px 7px 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(98, 209, 248, 0.2);
+    color: #001a57;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+/* center tabset panel */
+.data {
+  display:flex;
+  align-items: center;
+  flex-direction:column;
+  margin:auto;
+}
+
+.col-sm-8 {
+  float:none;
+}

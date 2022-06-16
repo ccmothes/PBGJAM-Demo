@@ -47,7 +47,9 @@ tif <- raster::raster("data/RCP45_2040_2069/R_SPQR_Agonoleptus.conjunctus.tif")
 
 library(arcpullr)
 
-test_url <- "https://tiledimageservices1.arcgis.com/KNdRU5cN6ENqCTjk/ArcGIS/rest/services/Beetlesmean_carabuGoryi_hist/ImageServer"
+token <- "PP0Ye9FY_8IXQj29GWpXmUOKGH5YJn7OFjrR0y9pAgYoy7L6xAcLZR2bNA4NZ3fcB0rppQWsJOtpO88spAFZt4Aon5jOGOtmDoPmkDzuMvPjMCof8UFz5NVEdqHUjAEnm5O4QiIn1WoLYx2ewy3Y1MDwo_tTQv7bxytk2jJmiK_UH9a-_2ZjjL129m09XYNB9FL5T-O0SFx3PoRapmUe-z0VELZS39yj2CivodnxNiV7m5PZgUHknlwta3ACp695"
+
+test_url <- "https://tiledimageservices1.arcgis.com/KNdRU5cN6ENqCTjk/arcgis/rest/services/2019_06_02_dense_ortho_4cm_px/ImageServer"
 
 test_bbox <- sf::st_bbox(tif) %>% 
   st_as_sfc() %>% 
@@ -82,7 +84,7 @@ wi_aerial_imagery_url <- paste0(image_server, wi_leaf_off_path)
 wi_aerial_imagery <- get_image_layer(wi_aerial_imagery_url, wis_poly)
 plot_layer(wi_aerial_imagery)
 
-test <- get_image_layer(test_url, wis_poly) # doesn't work
+test <- get_image_layer(test_url, test_bbox) # doesn't work
 
 
 # had to edit CRS to plot with leaflet
@@ -93,3 +95,42 @@ leaflet() %>%
   addRasterImage(wi_aerial_imagery[[1]], )
 
 get_service_type(wi_aerial_imagery_url)
+
+
+# read in from map server
+
+url <- "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}.png"
+test <- get_map_layer(url, wis_poly)
+
+leaflet() %>% 
+  addTiles() %>% 
+  addWMSTiles("https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/WMTS",
+              layers = "0",
+              options = WMSTileOptions(format = "image/png", transparent = TRUE))
+
+leaflet() %>% 
+  #addTiles() %>% 
+  addTiles(urlTemplate = "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}.png")
+
+data("World")
+
+## Interactive map
+tmap_mode("view")
+tm_shape(World) +
+  tm_tiles(url, group = "LABELS") +
+  tm_symbols(size = "gdp_cap_est")
+
+gdw <- rosm::as.tile_source(url, extension = "png")
+
+
+leaflet() %>% addTiles() %>% setView(-93.65, 42.0285, zoom = 7) %>%addWMSTiles(
+  "http://basemap.nationalmap.gov/arcgis/services/USGSHydroNHD/MapServer/WMSServer?",
+  layers = "0",
+  options = WMSTileOptions(format = "image/png", transparent = TRUE),
+  attribution = "") 
+
+
+#test arcpullr function
+export_url <- paste(url, "export", sep = "/")
+
+
