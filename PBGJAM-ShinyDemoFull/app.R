@@ -488,7 +488,9 @@ ui <-
                                                           choices =  c("Abundance" = "abundance",
                                                                        "Temperature" = "tmean",
                                                                        "Moisture Deficit" = "def"),
-                                                          selected = "abundance")),
+                                                          selected = "abundance"))),
+                                       fluidRow(
+                                              actionButton("plotVec", "Click to make vector plot!")
                                      ),
                                      plotlyOutput("vector_plot")
                                      
@@ -1461,12 +1463,18 @@ server <- function(input, output, session) {
   })
   
   
-  output$vector_plot <- renderPlotly({
+ 
     
-    # ## INTERACTIVE ## THIS WORKS BUT MAKES MAP FILTERING SLOW
-    sei_plot_bounds() %>%
-      rename(def_history = def.JJA, tmean_history = tmean.JJA) %>%
-      plot_ly(hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>")) %>%
+  
+  observeEvent(input$plotVec, {
+    
+    output$vector_plot <- renderPlotly({
+      
+      # ## INTERACTIVE ## THIS WORKS BUT MAKES MAP FILTERING SLOW
+      sei_plot_bounds() %>%
+        rename(def_history = def.JJA, tmean_history = tmean.JJA) %>%
+        plot_ly(hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>")) %>% 
+      
       add_markers(x = as.formula(paste0("~", x_vect1())),
                   y = as.formula(paste0("~", y_vect1())),
                   marker = list(color = "#ff0000", size = 10, sizemode = "diameter"), opacity = 0.8,  name = input$vect_time[1]) %>%
@@ -1487,7 +1495,8 @@ server <- function(input, output, session) {
                      xaxis = list(title = names(choiceVal2)[choiceVal2 == input$choose_x3],
                                   range = c(min(sei_scen()[,input$choose_x3]),
                                             max(sei_scen()[,input$choose_x3])))) 
-  
+    })
+
     
   })
   
