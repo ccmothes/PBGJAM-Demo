@@ -3,12 +3,14 @@
 
 
 /* overriding bootstrap */
-.container-fluid,
+/*.container-fluid,
 .navbar{
     width: 100%;
     padding: 0 auto !important;
     margin:0 auto !important;
-}
+}*/
+
+
 
 /* header background image */
 div.row.header {
@@ -17,6 +19,7 @@ div.row.header {
     background-position: center;
     background-size: cover;
     height: 63em;
+    margin-top: -2em;
 }
 
 /*header text*/
@@ -54,6 +57,7 @@ div.row.header {
   padding-right: 200px;
   padding-left: 200px;
   text-align: center !important;
+  margin-top: 2em;
 }
 
 .title p, h3 {
@@ -86,16 +90,24 @@ div.row.header {
 
 }
 
-.research p, h2 {
+div.row.research {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-top: 2em;
+}
+
+.research p, h2, h5 {
   padding: 15px;
   text-align: center;
   margin: auto;
 }
 
-.research h2 {
+.research h2, h5 {
   color: #30364d;
   font-family: 'Fira Sans', sans-serif;
   font-weight: 500;
+  vertical-align: bottom;
 }
 
 .research p {
@@ -103,14 +115,28 @@ div.row.header {
   font-family: Roboto, sans-serif;
 }
 
+.research img{
+  max-width: 100%;
+  width: 100%;
+  height: auto
+  margin-bottom: 0;
+}
+
+div.row.speciesBlock {
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+}
+
 /* add shaddow to buttons */
-div.col-sm-2 {
+div.col-sm-3.specs {
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 15px 30px 0 rgb(48 54 77 / 10%);
     color: #30364d;
     text-align: center;
-    margin-left: auto;
+    /*margin-left: auto;*/
+    max-width: fit-content;
 }
 
 
@@ -146,6 +172,7 @@ div.col-sm-2 {
   padding-right: 200px;
   padding-left: 200px;
   text-align: center !important;
+  margin-top: 2em;
 }
 
 .data p, h2 {
@@ -195,9 +222,137 @@ div.col-sm-2 {
   display:flex;
   align-items: center;
   flex-direction:column;
-  margin:auto;
+ /* margin: auto;*/
 }
+
 
 .col-sm-8 {
   float:none;
 }
+
+
+.data img{
+  float: left;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  margin: 1em;
+  border-radius: 8px;
+  box-shadow: 0 15px 30px 0 rgb(48 54 77 / 50%);
+}
+
+.climatedata img {
+  width: 300px !important;
+  margin-top: 5em !important;
+}
+
+.biodiversity img {
+  width: 300px !important;
+  margin-top: 5em !important;
+}
+
+.data a:hover {
+  background-color: #dbdbc3;
+  text-decoration: none;
+}
+
+.data a {
+    color: #000;
+    background-color: #FAFAF5;
+    border-color: #FAFAF5;
+    cursor: pointer;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 11px;
+    line-height: 22px;
+    font-weight: 500;
+    text-transform: uppercase;
+    overflow: visible;
+    box-shadow: 0 15px 30px 0 rgb(48 54 77 / 20%);
+}
+
+
+/* community section */
+
+
+.community strong{
+  /*display: inline-block;*/
+    margin-bottom: 10px;
+    padding: 4px 7px 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(98, 209, 248, 0.2);
+    color: #001a57;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+.community {
+  padding-right: 200px;
+  padding-left: 200px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  text-align: center !important;
+}
+
+
+div.row.community {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  /*align-items: flex-end;*/
+  margin: auto;
+}
+
+div.row.links {
+  display: flex;
+  justify-content: space-between !important;
+}
+
+
+.community p, h2 {
+  padding: 15px;
+  text-align: center;
+  margin: auto;
+}
+
+.community h2 {
+  color: #30364d;
+  font-family: 'Fira Sans', sans-serif;
+  font-weight: 500;
+}
+
+.community p {
+  color: #798099;
+  font-family: Roboto, sans-serif;
+}
+
+
+.community a {
+    color: #000;
+    background-color: #FAFAF5;
+    border-color: #FAFAF5;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    font-size: 25px;
+    line-height: 22px;
+    font-weight: 500;
+    padding: 1em;
+    margin: 1em;
+    /*text-transform: uppercase;*/
+    overflow: visible;
+    box-shadow: 0 15px 30px 0 rgb(48 54 77 / 20%);
+}
+
+
+.community a:hover {
+  background-color: #dbdbc3;
+  text-decoration: none;
+}
+
+

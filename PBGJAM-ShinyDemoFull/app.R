@@ -179,25 +179,19 @@ ui <-
                                  the maps and explore the model specifics or explore the maps by
                                  species taxa."),
                                br(),
-                               column(2, tags$img(src= 'beetles.png',
-                                                  title='Beetle photo',
-                                                  height='150px'), align = 'center',
+                               fluidRow(class = "speciesBlock",
+                               column(3, class = "specs", tags$img(src= 'beetles.png',
+                                                  title='Beetle photo'), align = 'center',
                                       h5("Beetles")),
-                               column(1),
-                               column(2, tags$img(src= 'birds.png',
-                                                  title='Bird photo',
-                                                  height='150px'), align = 'center',
+                               column(3, class = "specs", tags$img(src= 'birds.jpg',
+                                                  title='Bird photo'), align = 'center',
                                       h5("Birds")),
-                               column(1),
-                               column(2, tags$img(src= 'mammals.png',
-                                                  title='Mammal photo',
-                                                  height='150px'), align = 'center',
+                               column(3, class = "specs", tags$img(src= 'mammals.jpg',
+                                                  title='Mammal photo'), align = 'center',
                                       h5("Mammals")),
-                               column(1),
-                               column(2, tags$img(src= 'trees.png',
-                                                  title='Tree photo',
-                                                  height='150px'), align = 'center',
-                                      h5("Trees"))),
+                               column(3, class = "specs", tags$img(src= 'trees.png',
+                                                  title='Tree photo'), align = 'center',
+                                      h5("Trees")))),
                       fluidRow(class = "data",
                                fluidRow(class = "split2",
                                p(strong("SUSTAINABLE SCIENCE")),
@@ -208,11 +202,80 @@ ui <-
                                  we can better predict the impacts of climate change on our country and
                                  world."),
                                tabsetPanel(type = "tabs",
-                                           tabPanel("Remote Sensing Data"),
-                                           tabPanel("Biodiversity Data"),
-                                           tabPanel("Climate Data"))
+                                           tabPanel("Remote Sensing Data", class = "RS",
+                                                    fluidRow(
+                                                    column(5, 
+                                                           tags$img(src= 'river.jpeg',
+                                                                    title='River photo'), align = 'center',
+                                                           h2("NEON Aerial Observation Platform"),
+                                                           p("NEON provides hyperspectral and LiDAR data collected
+                                                             annually by an aerial observation platform. We use
+                                                             this data to better understand the local traits of
+                                                             ecosystems."),
+                                                           tags$a(href = "https://www.neonscience.org/data-collection/airborne-remote-sensing", 
+                                                                        target = "_blank", "Learn More")),
+                                                    column(2),
+                                                    column(5,
+                                                           tags$img(src= 'satellite.png',
+                                                                    title='Satellite photo'), align = 'center',
+                                                           h2("NASA Satellite Remote Sensing"),
+                                                           p("We use NASA satellites to understand how temperature,
+                                                             soil moisture, and the productivity of trees and other 
+                                                             planets drives the structure and composition of communities"),
+                                                           tags$a(href = 'https://www.earthdata.nasa.gov/learn/backgrounders/remote-sensing', 
+                                                                        target = "_blank", "Learn More")))),
+                                           tabPanel("Biodiversity Data", class = "biodiversity",
+                                                    fluidRow(
+                                                      column(5,
+                                                             tags$img(src= 'Landscape.jpg',
+                                                                      title='Landscape photo'), align = 'center'),
+                                                      column(2),
+                                                      column(5,
+                                                             p(strong("The wonder of life")),
+                                                             h2("Biodiversity drives the natural world and ecosystem
+                                                                services"),
+                                                             p("We use data collected by field assistants and
+                                                               research technicians from the Nationlal Ecological
+                                                               Observatory Network to develop our joint
+                                                               attribute models, and estimate where and when species
+                                                               will occur in the future under climate change"),
+                                                             tags$a(href = "https://www.neonscience.org/theme/organisms-populations-and-communities", 
+                                                                    target = "_blank", "Learn More"))
+                                                    )),
+                                           tabPanel("Climate Data", class = "climatedata",
+                                                    fluidRow(
+                                                      column(5,
+                                                             p(strong("Observations and interpolations")),
+                                                             h2("Our Changing Climate"),
+                                                             p("We use climate information that is taken and interpolated
+                                                               from many sources, including local weather stations, satellites,
+                                                               and remote observations to model how climate shapes the
+                                                               distribution and abundance of species."),
+                                                             tags$a(href = "https://climate.nasa.gov/", 
+                                                                    target = "_blank", "Learn More")),
+                                                      column(2),
+                                                      column(5,
+                                                              tags$img(src= 'climate.gif',
+                                                                       title='Climate gif'), align = 'center'))
+                                                    ))),
+                      fluidRow(class = "community",
+                               fluidRow(
+                                 p(strong("A community of science"))
+                               ),
+                               fluidRow(class = "links",
+                                 #column(5, class = "coms",
+                                        tags$a(href = "https://sites.nicholas.duke.edu/clarklab/people/", 
+                                               target = "_blank", "Our Research Team"),
+                                        #),
+                                 #column(2),
+                                 #column(5, class = "coms",
+                                        tags$a(href = "https://sites.nicholas.duke.edu/clarklab/news/", 
+                                               target = "_blank", "News and Updates")
+                                 #)
+                               ))
+                    
 
-                      )
+                      
                       ),
              
              ## neon --------------------------------------------------------------------
