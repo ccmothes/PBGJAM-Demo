@@ -100,7 +100,9 @@ get_service_type(wi_aerial_imagery_url)
 # read in from map server
 
 url <- "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}.png"
-test <- get_map_layer(url, wis_poly)
+
+test_url <- "https://tiles1.arcgis.com/tiles/nSZVuSZjHpEZZbRo/arcgis/rest/services/Historische_tijdreis_1996/MapServer/"
+test <- get_map_layer(test_url, wis_poly)
 
 leaflet() %>% 
   addTiles() %>% 
@@ -109,12 +111,17 @@ leaflet() %>%
               options = WMSTileOptions(format = "image/png", transparent = TRUE))
 
 leaflet() %>% 
-  #addTiles() %>% 
-  addTiles(urlTemplate = "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}.png")
+  addTiles() %>% 
+  addTiles(urlTemplate = "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/WMTS/tile/1.0.0/B_mean_selenoPlanip_hist/{z}/{y}/{x}.png")
+
+leaflet() %>% 
+  addTiles(test_url)
 
 data("World")
 
 ## Interactive map
+
+url <- "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}"
 tmap_mode("view")
 tm_shape(World) +
   tm_tiles(url, group = "LABELS") +
@@ -134,3 +141,30 @@ leaflet() %>% addTiles() %>% setView(-93.65, 42.0285, zoom = 7) %>%addWMSTiles(
 export_url <- paste(url, "export", sep = "/")
 
 
+leaflet() %>%
+  addTiles() %>% 
+  addWMSTiles(
+  "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/WMTS?",
+  layers = "0") 
+
+
+leaflet() %>%
+  addTiles() %>%
+  setView(-93.65, 42.0285, zoom = 4) %>%
+  addWMSTiles(baseUrl = "https://mrdata.usgs.gov/mapcache/wms/",
+              layers = "sim3340",
+              options = WMSTileOptions(format = "image/png", transparent = TRUE),
+              attribution = "")
+
+
+
+
+#THIS WORKS !!!!!!!!!!!!!#
+url <- "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}"
+
+
+#had to set view/zoom to see in viewer pane. Showed up when scrolling in on browser window
+leaflet() %>% 
+  addTiles() %>% 
+  setView(lat = 39, lng = -86, zoom = 3.5) %>% 
+  addTiles(url)
