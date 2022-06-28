@@ -1,4 +1,4 @@
-/* Get a fancy font from Google Fonts */
+/* Match font from original website */
 @import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
 
 
@@ -97,13 +97,11 @@ div.row.research {
   margin-top: 2em;
 }
 
-.research p, h2, h5 {
+
+.research h2, h5 {
   padding: 15px;
   text-align: center;
   margin: auto;
-}
-
-.research h2, h5 {
   color: #30364d;
   font-family: 'Fira Sans', sans-serif;
   font-weight: 500;
@@ -111,6 +109,9 @@ div.row.research {
 }
 
 .research p {
+  padding: 15px;
+  text-align: center;
+  margin: auto;
   color: #798099;
   font-family: Roboto, sans-serif;
 }

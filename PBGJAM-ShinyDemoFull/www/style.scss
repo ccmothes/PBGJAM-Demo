@@ -1,14 +1,19 @@
-/* Highlight group selection headers in indicator drop down*/
 @import url("https://fonts.googleapis.com/css?family=Fira+Sans:regular,500,600,700%7CRoboto:regular,500,700"); 
 
+/* Highlight group selection headers in indicator drop down*/
 .dropdown-header{
   color: #000000 !important;
   background-color: #e0e0d5 !important;
   font-weight: bold
 }
 
-
+/* Make vector plot button red outline */
 button#plotVec.btn.btn-default.action-button.shiny-bound-input {
   border-color: indianred !important;
     margin-left: 1em !important;
+}
+
+/* Increase size of text in navbar*/
+.navbar ul.nav.navbar-nav>li>a {
+  font-size: 18px;
 }

@@ -78,6 +78,9 @@ varsTime <- c("2018",
 varsTimeScen <- c("RCP 4.5" = "rcp45",
                   "RCP 8.5" = "rcp85")
 
+varsTimeScenMap <- c("RCP 4.5" = "RCP45",
+                     "RCP 8.5" = "RCP85")
+
 varsTimePer <- c("2040-2069" = "2040_2069",
                  "2070-2099" = "2070_2099")
 
@@ -597,17 +600,17 @@ ui <-
                                                        HTML("<b>Use Remote Sensing Inputs</b><br>More text here")
                                                      )),
                                    
-                                   #RCP
-                                   radioGroupButtons("rcp1", "Set Climate Scenario",
-                                                     choices = varsTimeScen),
-                                   
                                    #year
                                    radioGroupButtons("year1", "Set Year",
                                                      choices = c(
-                                                       "2018" = "historical",
-                                                       "2040-2069" = "2040_2069",
-                                                       "2070-2099" = "2070_2099"
+                                                       "2018" = "Hist",
+                                                       "2040-2069" = "2040",
+                                                       "2070-2099" = "2070"
                                                      )),
+                                   
+                                   #RCP
+                                   radioGroupButtons("rcp1", "Set Climate Scenario",
+                                                     choices = varsTimeScenMap),
                                    
                                    #Mapping Variable (abundance, uncertainty, Projected Change/Difference)
                                    radioGroupButtons("show1", "Show:",
@@ -622,10 +625,7 @@ ui <-
                           ),
                           tabPanel("Communities",
                                    br(),
-                                   #RCP
-                                   radioGroupButtons("rcp2", "Set Climate Scenario",
-                                                     choices = varsTimeScen),
-                                   
+
                                    #year
                                    radioGroupButtons("year2", "Set Year",
                                                      choices = c(
@@ -633,6 +633,10 @@ ui <-
                                                        "2040-2069" = "2040_2069",
                                                        "2070-2099" = "2070_2099"
                                                      )),
+                                   
+                                   #RCP
+                                   radioGroupButtons("rcp2", "Set Climate Scenario",
+                                                     choices = varsTimeScen),
                                    
                                    #select which communities shown on map)
                                    checkboxGroupButtons("CommBlocks2", "Choose a community:",
@@ -1529,34 +1533,55 @@ server <- function(input, output, session) {
   
   #read in raster map
   
-  folder <- reactive({
-    
-    if(input$year1 == "historical"){
-      return("historical/")
-    } else {
-      return(paste0(
-        input$rcp1,
-        "_",
-        input$year1,
-        "/"))
-    }
-    
-    
-  })
+  # folder <- reactive({
+  #   
+  #   if(input$year1 == "historical"){
+  #     return("historical/")
+  #   } else {
+  #     return(paste0(
+  #       input$rcp1,
+  #       "_",
+  #       input$year1,
+  #       "/"))
+  #   }
+  #   
+  #   
+  # })
+  # 
+  # reactiveRas <- reactive({
+  #   
+  #   if (input$specs1 == "s1") {
+  #     return(NULL)
+  #   } else {
+  #     
+  #     raster(paste0(
+  #       "data/",
+  #       folder(),
+  #       "R_SPQR_",
+  #       gsub(" ", ".", input$specs1),
+  #       ".tif"))
+  #   }
+  #   
+  # })
   
-  reactiveRas <- reactive({
+  #get tile map URL
+  tileMap <- reactive({
+    
+    url <- "https://tiles.arcgis.com/tiles/swlKRWoduvVuwMcX/arcgis/rest/services/Mean_"
     
     if (input$specs1 == "s1") {
       return(NULL)
-    } else {
+    
+      } else if (input$year1 == 'Hist') {
       
-      raster(paste0(
-        "data/",
-        folder(),
-        "R_SPQR_",
-        gsub(" ", ".", input$specs1),
-        ".tif"))
+      return(paste0(url, 'Hist_', gsub(" ", "_", input$specs1), "/MapServer/tile/{z}/{y}/{x}"))
+      
+        } else {
+          
+          return(paste0(url, input$rcp1, "_", input$year1, "_", gsub(" ", "_", input$specs1), "/MapServer/tile/{z}/{y}/{x}"))
+          
     }
+    
     
   })
   
@@ -1571,129 +1596,130 @@ server <- function(input, output, session) {
   
   
   #set color palette for mapping based on PBGJAM colors/categories
-  pal <- reactive({
-    
-    if (is.null(reactiveRas())) {
-      return(NULL)
-    } else {
-      colorBin(palette = c("#6246A5","#4C87B3", "#77C7A4", "#BEE7A5", "#EDFEAE",
-                           "#FBF1A9", "#FDC473", "#F67D52", "#D44853", "#990745"), 
-               values(reactiveRas()), 
-               bins = c(0,1,2,3,4,5,6,7,8,9,Inf), na.color = "transparent")
-    }
-  }) 
-  
+  # pal <- reactive({
+  #   
+  #   if (is.null(reactiveRas())) {
+  #     return(NULL)
+  #   } else {
+  #     colorBin(palette = c("#6246A5","#4C87B3", "#77C7A4", "#BEE7A5", "#EDFEAE",
+  #                          "#FBF1A9", "#FDC473", "#F67D52", "#D44853", "#990745"), 
+  #              values(reactiveRas()), 
+  #              bins = c(0,1,2,3,4,5,6,7,8,9,Inf), na.color = "transparent")
+  #   }
+  # }) 
+  # 
   #this updates the map only when species is changed
   observeEvent(input$specs1, {
     
     
-    if (is.null(reactiveRas())) {
+    if (is.null(tileMap())) {
       return(NULL)
     } else {
       leafletProxy("map") %>%
         removeImage("A") %>%
         clearControls() %>%
-        addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
-        addLegend(
-          pal = pal(),
-          values = values(reactiveRas()),
-          labFormat = function(type, cuts, p) {
-            paste0(c(
-              "0-1",
-              "1-2",
-              "2-3",
-              "3-4",
-              "4-5",
-              "5-6",
-              "6-7",
-              "7-8",
-              "8-9",
-              ">9"
-            ))
-          }
-          ,
-          title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
-          position = "bottomleft",
-          opacity = 1
-        )
+        #addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
+        addTiles(tileMap(), layerId = "A", options=tileOptions(maxNativeZoom = 6))
+        # addLegend(
+        #   pal = pal(),
+        #   values = values(reactiveRas()),
+        #   labFormat = function(type, cuts, p) {
+        #     paste0(c(
+        #       "0-1",
+        #       "1-2",
+        #       "2-3",
+        #       "3-4",
+        #       "4-5",
+        #       "5-6",
+        #       "6-7",
+        #       "7-8",
+        #       "8-9",
+        #       ">9"
+        #     ))
+        #   }
+        #   ,
+        #   title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
+        #   position = "bottomleft",
+        #   opacity = 1
+        # )
     }
   })
   
   #this updates when year is changed and adds split view, but since folder/reactiveRas() is the same the two maps are the same
   #observeEvent(input$year1, {
-  observe({
-    
-    if(input$splitView == TRUE)
-      
-      # if (is.null(reactiveRas())) {
-      #   return(NULL)
-      # } else {
-      leafletProxy("map") %>%
-      removeImage("B") %>%
-      #clearControls() %>%
-      addRasterImage2(reactiveRas(), colors = pal(), layerId = "B", project = TRUE, options = pathOptions(pane = "right")) %>%
-      #     addLegend(
-      #       pal = pal(),
-      #       values = values(reactiveRas()),
-      #       labFormat = function(type, cuts, p) {
-      #         paste0(c(
-      #           "0-1",
-      #           "1-2",
-      #           "2-3",
-      #           "3-4",
-      #           "4-5",
-      #           "5-6",
-    #           "6-7",
-    #           "7-8",
-    #           "8-9",
-    #           ">9"
-    #         ))
-    #       }
-    #       ,
-    #       title = "Abundance-weighted Habitat Suitability",
-    #       position = "bottomleft",
-    #       opacity = 1
-    #     )
-    # }
-    addSidebyside(layerId = "sidecontrols",
-                  rightId = "baseid",
-                  leftId = "cartoid")
-    
-    if(input$splitView == FALSE)
-      if (is.null(reactiveRas())) {
-        return(NULL)
-      } else {
-        leafletProxy("map") %>%
-          removeImage("A") %>%
-          clearControls() %>%
-          addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
-          addLegend(
-            pal = pal(),
-            values = values(reactiveRas()),
-            labFormat = function(type, cuts, p) {
-              paste0(c(
-                "0-1",
-                "1-2",
-                "2-3",
-                "3-4",
-                "4-5",
-                "5-6",
-                "6-7",
-                "7-8",
-                "8-9",
-                ">9"
-              ))
-            }
-            ,
-            title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
-            position = "bottomleft",
-            opacity = 1
-          )
-      }
-    
-    
-  })
-  
+  # observe({
+  #   
+  #   if(input$splitView == TRUE)
+  #     
+  #     # if (is.null(reactiveRas())) {
+  #     #   return(NULL)
+  #     # } else {
+  #     leafletProxy("map") %>%
+  #     removeImage("B") %>%
+  #     #clearControls() %>%
+  #     addRasterImage2(reactiveRas(), colors = pal(), layerId = "B", project = TRUE, options = pathOptions(pane = "right")) %>%
+  #     #     addLegend(
+  #     #       pal = pal(),
+  #     #       values = values(reactiveRas()),
+  #     #       labFormat = function(type, cuts, p) {
+  #     #         paste0(c(
+  #     #           "0-1",
+  #     #           "1-2",
+  #     #           "2-3",
+  #     #           "3-4",
+  #     #           "4-5",
+  #     #           "5-6",
+  #   #           "6-7",
+  #   #           "7-8",
+  #   #           "8-9",
+  #   #           ">9"
+  #   #         ))
+  #   #       }
+  #   #       ,
+  #   #       title = "Abundance-weighted Habitat Suitability",
+  #   #       position = "bottomleft",
+  #   #       opacity = 1
+  #   #     )
+  #   # }
+  #   addSidebyside(layerId = "sidecontrols",
+  #                 rightId = "baseid",
+  #                 leftId = "cartoid")
+  #   
+  #   if(input$splitView == FALSE)
+  #     if (is.null(reactiveRas())) {
+  #       return(NULL)
+  #     } else {
+  #       leafletProxy("map") %>%
+  #         removeImage("A") %>%
+  #         clearControls() %>%
+  #         addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
+  #         addLegend(
+  #           pal = pal(),
+  #           values = values(reactiveRas()),
+  #           labFormat = function(type, cuts, p) {
+  #             paste0(c(
+  #               "0-1",
+  #               "1-2",
+  #               "2-3",
+  #               "3-4",
+  #               "4-5",
+  #               "5-6",
+  #               "6-7",
+  #               "7-8",
+  #               "8-9",
+  #               ">9"
+  #             ))
+  #           }
+  #           ,
+  #           title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
+  #           position = "bottomleft",
+  #           opacity = 1
+  #         )
+  #     }
+  #   
+  #   
+  # })
+  # 
   
   ## models -------------------------------------------------------------------------------
   
