@@ -137,13 +137,14 @@ ui <-
                bslib::bs_add_rules(sass::sass_file("www/style.scss")),
              
              ## Homepage -------------------------------------------------------
-             tabPanel("Home", class = "home",
+             tabPanel("Home",
+                      tags$div(class = "container-fluid1",
                       tags$head(
                         tags$link(rel = "stylesheet", type = "text/css", href = "homepage.css")
                       ),
                       
                       fluidRow(class = 'header',
-                               column(4,
+                               column(6,
                                h1("Biodiversity habitats in transition: big data offer insights
                                   for species and communities"),
                                p("We apply the latest advancements in technology and statistics to forecast the
@@ -153,6 +154,7 @@ ui <-
                                        
                       ),
                       fluidRow(class = "logo",
+                               
                                column(3, tags$img(src= 'nasa.jpeg',
                                                   title='NASA logo',
                                                   height='65px'), align = 'center'),
@@ -166,15 +168,18 @@ ui <-
                                                   title='NEON logo',
                                                   height='65px'), align = 'center')),
                       fluidRow(class = "title",
+                               column(8, 
                                p(strong("PREDICTING BIODIVERSITY WITH GENERALIZED JOINT ATTRIBUTE MODELS")),
                                h3("With the support of NASA, we use satellites to monitor our changing planet,
                                   and through the National Ecological Observatory Network (NEON), we
                                   track how these changes will impact North America's species and wildlife communities"),
                                br(),
                                h3("We offer online tools and maps to explore these changes, and the option
-                                  to download this information for your own use")),
+                                  to download this information for your own use"))),
                       fluidRow(class = "research",
+                               column(10,
                                fluidRow(class = "split",
+                                       
                                p(strong("MAPS AND MODELS")),
                                h2("Explore Our Research")),
                                p("Our maps are based on advances in Bayesian modeling, and unique in
@@ -183,6 +188,7 @@ ui <-
                                  species taxa."),
                                br(),
                                fluidRow(class = "speciesBlock",
+                                      
                                column(3, class = "specs", tags$img(src= 'beetles.png',
                                                   title='Beetle photo'), align = 'center',
                                       h5("Beetles")),
@@ -194,8 +200,9 @@ ui <-
                                       h5("Mammals")),
                                column(3, class = "specs", tags$img(src= 'trees.png',
                                                   title='Tree photo'), align = 'center',
-                                      h5("Trees")))),
+                                      h5("Trees"))))),
                       fluidRow(class = "data",
+                               column(10,
                                fluidRow(class = "split2",
                                p(strong("SUSTAINABLE SCIENCE")),
                                h2("Our Data Streams")),
@@ -204,6 +211,7 @@ ui <-
                                  Network and other open source data sets and citizen science projects,
                                  we can better predict the impacts of climate change on our country and
                                  world."),
+                               fluidRow(class = "datatabs",
                                tabsetPanel(type = "tabs",
                                            tabPanel("Remote Sensing Data", class = "RS",
                                                     fluidRow(
@@ -260,7 +268,7 @@ ui <-
                                                       column(5,
                                                               tags$img(src= 'climate.gif',
                                                                        title='Climate gif'), align = 'center'))
-                                                    ))),
+                                                    ))))),
                       fluidRow(class = "community",
                                fluidRow(
                                  p(strong("A community of science"))
@@ -279,6 +287,7 @@ ui <-
                     
 
                       
+                      )
                       ),
              
              ## neon --------------------------------------------------------------------
@@ -1619,29 +1628,42 @@ server <- function(input, output, session) {
         removeImage("A") %>%
         clearControls() %>%
         #addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
-        addTiles(tileMap(), layerId = "A", options=tileOptions(maxNativeZoom = 6))
-        # addLegend(
-        #   pal = pal(),
-        #   values = values(reactiveRas()),
-        #   labFormat = function(type, cuts, p) {
-        #     paste0(c(
-        #       "0-1",
-        #       "1-2",
-        #       "2-3",
-        #       "3-4",
-        #       "4-5",
-        #       "5-6",
-        #       "6-7",
-        #       "7-8",
-        #       "8-9",
-        #       ">9"
-        #     ))
-        #   }
-        #   ,
-        #   title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
-        #   position = "bottomleft",
-        #   opacity = 1
-        # )
+        addTiles(tileMap(), layerId = "A", options=tileOptions(maxNativeZoom = 6)) %>% 
+        addLegend(
+          #pal = pal(),
+          #values = values(reactiveRas()),
+          # labFormat = function(type, cuts, p) {
+          #   paste0(c(
+          #     "0-1",
+          #     "1-2",
+          #     "2-3",
+          #     "3-4",
+          #     "4-5",
+          #     "5-6",
+          #     "6-7",
+          #     "7-8",
+          #     "8-9",
+          #     ">9"
+          #   ))
+          # }
+          colors = c("#6246A5","#4C87B3", "#77C7A4", "#BEE7A5", "#EDFEAE",
+                      "#FBF1A9", "#FDC473", "#F67D52", "#D44853", "#990745"),
+          labels = c(
+            "0-1",
+            "1-2",
+            "2-3",
+            "3-4",
+            "4-5",
+            "5-6",
+            "6-7",
+            "7-8",
+            "8-9",
+            ">9"
+          ),
+          title = paste0(HTML("Abundance-weighted<br>Habitat Suitability<br>"), input$specs1),
+          position = "bottomleft",
+          opacity = 1
+        )
     }
   })
   
@@ -1721,7 +1743,7 @@ server <- function(input, output, session) {
   # })
   # 
   
-  ## models -------------------------------------------------------------------------------
+  # models -------------------------------------------------------------------------------
   
   # pulled from Amanda's code
   

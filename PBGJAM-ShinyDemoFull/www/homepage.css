@@ -10,6 +10,12 @@
     margin:0 auto !important;
 }*/
 
+/* remove margins from container fluid for Home tab only */
+
+.container-fluid1{
+  padding: 0px !important;
+
+}
 
 
 /* header background image */
@@ -28,7 +34,7 @@ div.row.header {
   margin-top: 1em;
   margin-left: 0.75em;
     margin-bottom: 1em;
-    margin-right: -5em;
+    /*margin-right: -5em;*/
     font-family: 'Fira Sans', sans-serif;
     font-size: 44px;
     line-height: 56px;
@@ -39,7 +45,7 @@ div.row.header {
   font-family: Roboto, sans-serif;
   color: white;
   margin-left: 2em;
-  margin-right: -4em;
+  /*margin-right: -4em;*/
   font-size: 18px;
 
 }
@@ -49,16 +55,23 @@ div.row.header {
 .logo {
   margin-top: 20px;
   margin-bottom: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* propoerties of intro text*/
 
 .title {
-  padding-right: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*padding-right: 200px;
   padding-left: 200px;
   text-align: center !important;
-  margin-top: 2em;
+  margin-top: 2em; */
 }
+
 
 .title p, h3 {
   padding: 15px;
@@ -73,7 +86,7 @@ div.row.header {
     border-radius: 4px;
     background-color: rgba(98, 209, 248, 0.2);
     color: #001a57;
-    font-size: 11px;
+    font-size: 15px;
     line-height: 16px;
     font-weight: 500;
     letter-spacing: 1.5px;
@@ -83,8 +96,8 @@ div.row.header {
 /* properties of explore research section*/
 
 .research {
-  padding-right: 200px;
-  padding-left: 200px;
+  /*padding-right: 200px;
+  padding-left: 200px;*/
   padding-top: 50px;
   padding-bottom: 50px;
 
@@ -114,6 +127,7 @@ div.row.research {
   margin: auto;
   color: #798099;
   font-family: Roboto, sans-serif;
+  font-size: 18px;
 }
 
 .research img{
@@ -159,7 +173,7 @@ div.col-sm-3.specs {
     border-radius: 4px;
     background-color: rgba(98, 209, 248, 0.2);
     color: #001a57;
-    font-size: 11px;
+    font-size: 15px;
     line-height: 16px;
     font-weight: 500;
     letter-spacing: 1.5px;
@@ -170,8 +184,8 @@ div.col-sm-3.specs {
 /* data streams properties */
 
 .data {
-  padding-right: 200px;
-  padding-left: 200px;
+  /*padding-right: 200px;
+  padding-left: 200px;*/
   text-align: center !important;
   margin-top: 2em;
 }
@@ -191,6 +205,7 @@ div.col-sm-3.specs {
 .data p {
   color: #798099;
   font-family: Roboto, sans-serif;
+  font-size: 18px;
 }
 
 /* had to put first two text elements in separate div to stack them */
@@ -210,7 +225,7 @@ div.col-sm-3.specs {
     border-radius: 4px;
     background-color: rgba(98, 209, 248, 0.2);
     color: #001a57;
-    font-size: 11px;
+    font-size: 15px;
     line-height: 16px;
     font-weight: 500;
     letter-spacing: 1.5px;
@@ -218,9 +233,10 @@ div.col-sm-3.specs {
 }
 
 
-/* center tabset panel */
+
 .data {
   display:flex;
+  justify-content: center;
   align-items: center;
   flex-direction:column;
  /* margin: auto;*/
@@ -233,7 +249,7 @@ div.col-sm-3.specs {
 
 
 .data img{
-  float: left;
+  /*float: left;*/
   max-width: 100%;
   width: 100%;
   height: auto;
@@ -273,6 +289,10 @@ div.col-sm-3.specs {
     box-shadow: 0 15px 30px 0 rgb(48 54 77 / 20%);
 }
 
+/*center tabset*/
+.datatabs ul.nav.nav-tabs {
+    justify-content: center;
+}
 
 /* community section */
 
@@ -284,7 +304,7 @@ div.col-sm-3.specs {
     border-radius: 4px;
     background-color: rgba(98, 209, 248, 0.2);
     color: #001a57;
-    font-size: 11px;
+    font-size: 15px;
     line-height: 16px;
     font-weight: 500;
     letter-spacing: 1.5px;
@@ -304,14 +324,16 @@ div.col-sm-3.specs {
 div.row.community {
   display: flex;
   justify-content: center;
-  flex-direction: column;
+  /*flex-direction: column;
   /*align-items: flex-end;*/
   margin: auto;
 }
 
 div.row.links {
   display: flex;
-  justify-content: space-between !important;
+  justify-content: center !important;
+  padding-left: 5em;
+  padding-right: 5em;
 }
 
 
