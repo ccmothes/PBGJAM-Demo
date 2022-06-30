@@ -218,3 +218,13 @@ scen <- dat_test %>%
   group_by(plot.ID, scenario, time) %>% 
   summarise(across(c("abundance", "tmean", "def"), ~sum(.x, na.rm = TRUE)), across()) %>% 
   mutate(time = factor(time, levels = c("history", "2021.204", "2061.208", "2081.21")))
+
+
+# Update Species lists for Mapper
+
+beetles <- read_csv("PBGJAM-ShinyDemoFull/data/filesAll/mapList_NEON_Beetles.csv") %>% 
+  mutate(scientificName = str_replace(Name.Spaces, " ", ".")) %>% 
+  dplyr::select(scientificName, nameShort = Name.short)
+  
+write_csv(beetles, "PBGJAM-ShinyDemoFull/data/filesAll/mapList_NEON_Beetles.csv")
+

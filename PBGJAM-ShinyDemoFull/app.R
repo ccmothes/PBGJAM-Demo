@@ -562,21 +562,22 @@ ui <-
              ## maps --------------------------------------------------------
              tabPanel("Species Maps",
                       # div(class = "outer"),
+                      sidebarLayout(
+                      mainPanel(
+                      leaflet::leafletOutput("map", width = "100%", height = "100%")),
                       
-                      leaflet::leafletOutput("map", width = "100%", height = 800),
-                      
-                      absolutePanel(
-                        id = "controls",
-                        class = "panel panel-default",
-                        #fixed = TRUE,
-                        draggale = TRUE,
-                        top = 70,
-                        left = "auto",
-                        right = 20,
-                        bottom = "auto",
-                        width = 400,
-                        height = "auto",
-                        style = "opacity: 0.9; background-color: white; padding: 0 20px 20px 20px",
+                      sidebarPanel(
+                        # id = "controls",
+                        # class = "panel panel-default",
+                        # #fixed = TRUE,
+                        # draggale = TRUE,
+                        # top = 70,
+                        # left = "auto",
+                        # right = 20,
+                        # bottom = "auto",
+                        # width = 400,
+                        # height = "auto",
+                        # style = "opacity: 0.9; background-color: white; padding: 0 20px 20px 20px",
                         tabsetPanel(
                           tabPanel("Species",
                                    br(),
@@ -703,7 +704,7 @@ ui <-
                           
                         )
                         
-                      )),
+                      ))),
              
              ## models ---------------------------------------------------------------------------
              navbarMenu("Species Models",
@@ -1519,12 +1520,25 @@ server <- function(input, output, session) {
   
   #update species list
   observe({
-    specUpdate <-
-      read.csv(paste0("data/filesAll/speciesList_", input$taxa1, ".csv"),
-               stringsAsFactors = F)
     
-    charNames <- 
-      gsub("[.]", " ", specUpdate[, "scientificName"])
+    if (input$taxa1 == "NEON_Beetles") {
+      
+      specUpdate <-
+        read.csv(paste0("data/filesAll/mapList_", input$taxa1, ".csv"),
+                 stringsAsFactors = F)
+      
+      charNames <- 
+        gsub("[.]", " ", specUpdate[, "scientificName"])
+      
+    } else {
+      specUpdate <-
+        read.csv(paste0("data/filesAll/speciesList_", input$taxa1, ".csv"),
+                 stringsAsFactors = F)
+      
+      charNames <- 
+        gsub("[.]", " ", specUpdate[, "scientificName"])
+
+    }
     
     updateSelectInput(session, "specs1",
                       choices = c("", charNames), # update choices
@@ -1600,7 +1614,7 @@ server <- function(input, output, session) {
       addMapPane("left", zIndex = 0) %>%
       addMapPane("right", zIndex = 0) %>%
       addTiles(options = pathOptions(pane = "left")) %>% 
-      setView(lat = 39, lng = -86, zoom = 3.5) 
+      setView(lat = 39, lng = -95, zoom = 3.5) 
   })
   
   
