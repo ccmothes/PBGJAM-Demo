@@ -1632,8 +1632,9 @@ server <- function(input, output, session) {
   # }) 
   # 
   #this updates the map only when species is changed
-  observeEvent(input$specs1, {
-    
+  #observeEvent(input$specs1, {
+  
+  observe({  
     
     if (is.null(tileMap())) {
       return(NULL)
