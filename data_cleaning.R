@@ -220,11 +220,27 @@ scen <- dat_test %>%
   mutate(time = factor(time, levels = c("history", "2021.204", "2061.208", "2081.21")))
 
 
-# Update Species lists for Mapper
+# Update Species lists for Mapper -----------------
 
+##beetles
 beetles <- read_csv("PBGJAM-ShinyDemoFull/data/filesAll/mapList_NEON_Beetles.csv") %>% 
   mutate(scientificName = str_replace(Name.Spaces, " ", ".")) %>% 
   dplyr::select(scientificName, nameShort = Name.short)
   
 write_csv(beetles, "PBGJAM-ShinyDemoFull/data/filesAll/mapList_NEON_Beetles.csv")
 
+##trees
+trees <- read_csv("PBGJAM-ShinyDemoFull/data/filesAll/mapList_NEON_Trees.csv") %>% 
+  mutate(scientificName = str_replace(Name.space, " ", ".")) %>% 
+  dplyr::select(scientificName, nameShort = Name.short)
+
+#change name to match varsTaxa in shiny app
+write_csv(trees, "PBGJAM-ShinyDemoFull/data/filesAll/mapList_FIA_trees.csv")
+
+
+#replace UNKN with spp
+trees <- read_csv("PBGJAM-ShinyDemoFull/data/filesAll/mapList_FIA_trees.csv") %>% 
+  mutate(scientificName = str_replace(scientificName, "UNKN", "spp"))
+
+
+write_csv(trees, "PBGJAM-ShinyDemoFull/data/filesAll/mapList_FIA_trees.csv")
