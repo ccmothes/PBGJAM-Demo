@@ -60,6 +60,10 @@ att <- paste0("<a href='https://www.usgs.gov/'>",
               "<a href='https://www.usgs.gov/laws/policies_notices.html'>",
               "Policies</a>")
 
+# habitat varialbe description table
+var_table <- readxl::read_xlsx("data/var_description.xlsx") %>% 
+  mutate(Reference = if_else(is.na(Reference), "", Reference))
+
 ## maps and models tab -------------------------------------------------------------------
 
 source("addRasterImage2.R")
@@ -295,6 +299,11 @@ ui <-
              tabPanel("NEON Sites",
                       fluidPage(
                         fluidRow(
+                          h2(strong("Ground Beetle species abundance and habitat variable exploration"))
+                        ),
+                        hr(),
+                        
+                        fluidRow(
                           column(6,
                                  fluidRow(
                                    column(4,
@@ -503,7 +512,9 @@ ui <-
                                                                        "Moisture Deficit" = "def"),
                                                           selected = "abundance"))),
                                        fluidRow(
-                                              actionButton("plotVec", "Click to make vector plot!")
+                                         column(12,
+                                              actionButton("plotVec", "Click to make vector plot!", width = "100%")
+                                       )
                                      ),
                                      plotlyOutput("vector_plot")
                                      
@@ -551,6 +562,10 @@ ui <-
                                      ),
                                      plotlyOutput("speciesScatter")
                                      
+                                   ),
+                                   tabPanel(
+                                     "Description of Habitat Variables",
+                                     tableOutput('var_description')
                                    )
                                  )
                                  
@@ -1491,8 +1506,6 @@ server <- function(input, output, session) {
   })
   
   
- 
-    
   
   observeEvent(input$plotVec, {
     
@@ -1527,6 +1540,10 @@ server <- function(input, output, session) {
 
     
   })
+  
+  
+  # Variable description table
+ output$var_description <- renderTable(var_table)
   
   
   
@@ -1678,17 +1695,61 @@ server <- function(input, output, session) {
   
   labels <- reactive({
     if(input$mapVar == "Mean"){
-      return(c("0-1",
-               "1-2",
-               "2-3",
-               "3-4",
-               "4-5",
-               "5-6",
-               "6-7",
-               "7-8",
-               "8-9",
-               ">9"
-      ))
+      
+      if(input$taxa1 == "FIA_trees"){
+        return(c("0-0.5",
+                 "0.5-1",
+                 "1-1.5",
+                 "1.5-2",
+                 "2-2.5",
+                 "2.5-3",
+                 "3-3.5",
+                 "3.5-4",
+                 "4-4.5",
+                 ">4.5"
+        ))
+        
+      } else if(input$taxa1 == "BBS-NEON_Breeding-Birds"){
+        return(c("0-5",
+                 "5-10",
+                 "10-15",
+                 "15-20",
+                 "20-25",
+                 "25-30",
+                 "30-35",
+                 "35-40",
+                 "40-45",
+                 ">45"
+        ))
+      } else if(input$taxa1 == "NEON_Small-Mammals") {
+        return(c("0-0.25",
+                 "0.25-0.5",
+                 "0.5-0.75",
+                 "0.75-1",
+                 "1-1.25",
+                 "1.25-1.5",
+                 "1.5-1.75",
+                 "1.75-2",
+                 "2-2.25",
+                 ">2.25"
+        ))
+        
+      } else{
+        return(c("0-1",
+                 "1-2",
+                 "2-3",
+                 "3-4",
+                 "4-5",
+                 "5-6",
+                 "6-7",
+                 "7-8",
+                 "8-9",
+                 ">9"
+        ))
+        
+      }
+      
+     
     } else {
       return(c("<=1",
         "1-2",
