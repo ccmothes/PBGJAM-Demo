@@ -129,6 +129,8 @@ ui <-
                width="20%",
                height="20%"
              ),
+             #stop map elements from covering drop down menus
+             tags$head(tags$style('.dropdown-menu {z-index: 10000 !important}')),
              theme = bslib::bs_theme(
                version = 4,
                bootswatch = "sandstone",
@@ -297,6 +299,8 @@ ui <-
              
              ## neon --------------------------------------------------------------------
              tabPanel("NEON Sites",
+                      #Stop leaflet elements from covering select inputs
+                      
                       fluidPage(
                         fluidRow(
                           h2(strong("Ground Beetle species abundance and habitat variable exploration"))
@@ -592,7 +596,7 @@ ui <-
                         class = "panel panel-default",
                         fixed = TRUE,
                         draggable = TRUE,
-                        top = 90,
+                        top = 100,
                         left = "auto",
                         right = 20,
                         bottom = "auto",
@@ -610,7 +614,7 @@ ui <-
                                                               #choices = c("Small Mammals", "Birds", "Beetles", "Trees"),
                                                               
                                                               individual = TRUE, 
-                                                              selected = "NEON_Beetles"
+                                                              selected = "NEON_Small-Mammals"
                                             ),
                                             #update list of species based on taxa selection)
                                             selectInput("specs1", "Choose Species",
@@ -1116,6 +1120,8 @@ server <- function(input, output, session) {
   
   # get species-specific value range for map color palette
   range <- reactive({
+    
+    
     max(max(sei_map()$variable, na.rm = TRUE), abs(min(sei_map()$variable, na.rm = TRUE)))
     
   })
@@ -1395,13 +1401,87 @@ server <- function(input, output, session) {
   })
   
   
+  # get species-specific value range for abundance color palette
+  z_range <- reactive({
+    max(max(sei_plot()[,z_3d()], na.rm = TRUE), abs(min(sei_plot()[,z_3d()], na.rm = TRUE)))
+    
+  })
+  
+  #color by palette based on variable (to match map color scale)
+  z_color <- reactive({
+    
+    if(input$choose_color == "gap.frac.10"){
+      return(list(
+        color=as.formula(paste0("~", z_3d())),
+        colorscale = "Greens",
+        cmin = 0,
+        cmax = 1,
+        reversescale = F,
+        line=list(width=0),
+        colorbar=list(title=names(choiceVal1)[choiceVal1 == input$choose_color], 
+                               limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
+      ))
+      #colorNumeric(palette = "Greens", domain = sei_plot()[,z_3d()], reverse = TRUE)
+    } 
+    
+    else if(input$choose_color == "abundance"){
+      return(list(
+        color=as.formula(paste0("~", z_3d())),
+        colorscale = "RdBu",
+        cmin = -z_range(),
+        cmax = z_range(),
+        reversescale = F,
+        line=list(width=0),
+        colorbar=list(title=names(choiceVal1)[choiceVal1 == input$choose_color], 
+                      limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
+      ))
+      
+      # colorBin(palette = "RdBu", domain = c(-z_range(),
+      #                                       z_range()),
+      #          reverse = TRUE)
+      
+    } else if(input$choose_color == "def"){
+      return(list(
+        color=as.formula(paste0("~", z_3d())),
+        colorscale = "RdBu",
+        cmin = -max(sei_plot()[,z_3d()], na.rm = TRUE),
+        cmax = max(sei_plot()[,z_3d()], na.rm = TRUE),
+        reversescale = F,
+        line=list(width=0),
+        colorbar=list(title=names(choiceVal1)[choiceVal1 == input$choose_color], 
+                      limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
+      ))
+      
+      # colorBin(palette = "RdBu", domain = c(-max(sei_plot()[,z_3d()], na.rm = TRUE),
+      #                                       max(sei_plot()[,z_3d()], na.rm = TRUE)),
+      #          reverse = TRUE)
+      
+    } else {
+      
+      return(list(
+        color=as.formula(paste0("~", z_3d())),
+        colorscale = "Reds",
+        cmin = min(sei_plot()[,z_3d()], na.rm = TRUE),
+        cmax = max(sei_plot()[,z_3d()], na.rm = TRUE),
+        reversescale = F,
+        line=list(width=0),
+        colorbar=list(title=names(choiceVal1)[choiceVal1 == input$choose_color], 
+                      limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
+      ))
+      #colorNumeric(palette = "Reds", domain = sei_plot()[,z_3d()])
+    }
+    
+  })
+  
+  
   output$choose_scatter <- renderPlotly({
     
     sei_plot_bounds() %>% 
       plot_ly(x = as.formula(paste0("~", x_3d())), y = as.formula(paste0("~", y_3d())), 
-              color = as.formula(paste0("~", z_3d())),
+              #color = as.formula(paste0("~", z_3d())),
               size = 4,
-              #marker = list(line = list(width = 0)),
+              #colors = z_color(),
+              marker = z_color(),
               hovertemplate =  paste("%{x},%{y}<br>","Site:", .$plot.ID, "<extra></extra>"),
               type = "scatter", mode = "markers") %>%
       plotly::layout(yaxis = list(title = names(choiceVal1)[choiceVal1 == input$choose_y], 
@@ -1410,8 +1490,8 @@ server <- function(input, output, session) {
                      xaxis = list(title = names(choiceVal1)[choiceVal1 == input$choose_x], 
                                   range = c(min(sei_plot()[,x_3d()]), 
                                             max(sei_plot()[,x_3d()])))
-      ) %>%
-      colorbar(title=names(choiceVal1)[choiceVal1 == input$choose_color], limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
+      )# %>%
+      #colorbar(title=names(choiceVal1)[choiceVal1 == input$choose_color], limits = c(min(sei_plot()[,z_3d()]), max(sei_plot()[,z_3d()])))
     
     
     
@@ -1573,8 +1653,11 @@ server <- function(input, output, session) {
     }
     
     updateSelectInput(session, "specs1",
-                      choices = c("", charNames), # update choices
-                      selected = character(0))
+                      choices = c("", charNames), # default no species selected
+                      #choices = charNames, # default first species selected
+                      
+                      #selected = charNames[1]
+                      )
     #selected = gsub("[.]"," ",specUpdate[order(specUpdate$colSums, decreasing = T),"scientificName"][1])) # remove selection
   })
   
@@ -1653,16 +1736,6 @@ server <- function(input, output, session) {
     }
     
     
-  })
-  
-  # set up base map
-  output$map <- renderLeaflet({
-    leaflet() %>% 
-      # these options allow for switch panel:
-      addMapPane("left", zIndex = 0) %>%
-      addMapPane("right", zIndex = 0) %>%
-      addTiles(options = pathOptions(pane = "left")) %>% 
-      setView(lat = 39, lng = -95, zoom = 3.5) 
   })
   
   
@@ -1764,6 +1837,19 @@ server <- function(input, output, session) {
       ))
     }
   })
+  
+  
+  # set up base map
+  output$map <- renderLeaflet({
+    leaflet() %>% 
+      # these options allow for switch panel:
+      addMapPane("left", zIndex = 0) %>%
+      addMapPane("right", zIndex = 0) %>%
+      addTiles(options = pathOptions(pane = "left")) %>% 
+      setView(lat = 39, lng = -89, zoom = 3.5) 
+  })
+  
+  
   
   observe({  
     
