@@ -168,3 +168,50 @@ leaflet() %>%
   addTiles() %>% 
   setView(lat = 39, lng = -86, zoom = 3.5) %>% 
   addTiles(url)
+
+
+
+# communities layers ---------------------------------
+
+library(arcpullr)
+
+
+hist_45 <- arcpullr::get_spatial_layer(url = 'https://services5.arcgis.com/swlKRWoduvVuwMcX/ArcGIS/rest/services/PBGJam_Communities/FeatureServer/0')
+
+test <- hist_45 %>% filter(Name == "Desert")
+
+
+# add to leaflet
+
+#Need to double-check match-up of color to habitat name
+#color palette for communities
+commPal <- colorFactor(c("#cccccc",
+                         "#686868",
+                         "#9ed7c2",
+                         "#00a884",
+                         "#e8beff",
+                         "#c500ff",
+                         "#d7c29e",
+                         "#895a44",
+                         "#a6cee3",
+                         "#1f79b5",
+                         "#b1de8a",
+                         "#33a12b",
+                         "#fa9a98",
+                         "#e3191c",
+                         "#fcbf6f",
+                         "#ff8000",
+                         "#cab2d6",
+                         "#693d99",
+                         "#ffff99",
+                         "#a8a800"), hist_45$Name)
+
+leaflet() %>% 
+  # these options allow for switch panel:
+  addMapPane("left", zIndex = 0) %>%
+  addMapPane("right", zIndex = 0) %>%
+  addTiles(options = pathOptions(pane = "left")) %>% 
+  setView(lat = 39, lng = -89, zoom = 3.5) %>% 
+  addPolygons(data = hist_45, color = ~commPal(Name),
+              stroke = FALSE, fillOpacity = 1)
+              
