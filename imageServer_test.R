@@ -207,11 +207,30 @@ commPal <- colorFactor(c("#cccccc",
                          "#a8a800"), hist_45$Name)
 
 leaflet() %>% 
-  # these options allow for switch panel:
-  addMapPane("left", zIndex = 0) %>%
-  addMapPane("right", zIndex = 0) %>%
-  addTiles(options = pathOptions(pane = "left")) %>% 
+  addTiles() %>% 
   setView(lat = 39, lng = -89, zoom = 3.5) %>% 
-  addPolygons(data = hist_45, color = ~commPal(Name),
+  addPolygons(data = layer_test, color = ~commPal(Name),
               stroke = FALSE, fillOpacity = 1)
-              
+      
+
+# save all maps to an RData files
+library(rmapshaper)
+
+layers <- vector("list", length = 6)
+nums <- 0:5
+
+for (i in 1:length(nums)){
+  layers[[i]] <- arcpullr::get_spatial_layer(url = paste0('https://services5.arcgis.com/swlKRWoduvVuwMcX/ArcGIS/rest/services/PBGJam_Communities/FeatureServer/', nums[i]))
+  
+  print(i)
+}
+
+save(layers, file = "PBGJAM-ShinyDemoFull/data/comm_layers.RData")
+
+
+#if want to simplify layers...
+
+layer_test <- layers[[1]] %>% 
+  st_make_valid() %>% 
+  st_simplify(preserveTopology = TRUE) %>% 
+  ms_simplify()

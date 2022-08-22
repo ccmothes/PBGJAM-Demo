@@ -17,6 +17,8 @@ library(plotly)
 library(tidyr)
 library(stringr)
 library(rgdal)
+library(arcpullr)
+
 
 
 ## neon tab --------------------------------------------
@@ -111,6 +113,8 @@ varsGObetas3 <- c("Common name" = "vernacularName",
                   "Scientific name" = "scientificName")
 
 varsGObetas3b <- c("Scientific name" = "scientificName")
+
+load("data/comm_layers.RData")
 
 
 #pbgjam logo
@@ -585,159 +589,226 @@ ui <-
                       #sidebarLayout(
                       #mainPanel(
                       #fillPage(
-                      shinyUI(bootstrapPage(
+                      # shinyUI(bootstrapPage(
+                      #
+                      # leaflet::leafletOutput("map", height = "85vh"),
+                      #
+                      # #sidebarPanel(
+                      #   ## code for absolute panel:
+                      #   fixedPanel(
+                      #   #absolutePanel(
+                      #   id = "controls",
+                      #   class = "panel panel-default",
+                      #   #fixed = TRUE,
+                      #   #draggable = TRUE,
+                      #   top = 100,
+                      #   left = "auto",
+                      #   right = 20,
+                      #   bottom = "auto",
+                      #   width = 330,
+                      #   height = "auto",
+                      #   style = "opacity: 0.9; background-color: white; padding: 0 20px 20px 20px",
+                      #   HTML('<button class ="btn btn-primary" data-toggle="collapse" data-target="#collapse-panel">Collapse Controls</button>'),
+                      #
+                      #   tags$div(id = "collapse-panel", class = "collapse show",
+                      tabsetPanel(
+                        type = "tabs",
                         
-                      leaflet::leafletOutput("map", height = "85vh"),
-                      
-                      #sidebarPanel(
-                        ## code for absolute panel:
-                        absolutePanel(
-                        id = "controls",
-                        class = "panel panel-default",
-                        fixed = TRUE,
-                        draggable = TRUE,
-                        top = 100,
-                        left = "auto",
-                        right = 20,
-                        bottom = "auto",
-                        width = 330,
-                        height = "auto",
-                        style = "opacity: 0.9; background-color: white; padding: 0 20px 20px 20px",
-                        HTML('<button class ="btn btn-primary" data-toggle="collapse" data-target="#collapse-panel">Collapse Controls</button>'),
-                      
-                        tags$div(id = "collapse-panel", class = "collapse show",
-                                 tabsetPanel(
-                                   tabPanel("Species",
-                                            br(),
-                                            radioGroupButtons("taxa1", "Choose Taxa Group",
-                                                              varsTaxa,
-                                                              #choices = c("Small Mammals", "Birds", "Beetles", "Trees"),
-                                                              
-                                                              individual = TRUE, 
-                                                              selected = "NEON_Small-Mammals"
-                                            ),
-                                            #update list of species based on taxa selection)
-                                            selectInput("specs1", "Choose Species",
-                                                        varsGOacc3),
-                                            hr(),
-                                            
-                                            #paste species name as header
-                                            h3(em(textOutput("spText"))),
-                                            
-                                            
-                                            p(textOutput("abunText")),
-                                            
-                                            hr(),
-                                            
-                                            # If split map view was implemented:
-                                            # switchInput(inputId = "splitView", label = "Split Map View",
-                                            #             labelWidth = "100px", onStatus = "success",
-                                            #             offStatus = "danger",
-                                            #             value = FALSE, inline = TRUE),
-                                            
-                                            #predictors (Not applicable for trees/beetles/new models)
-                                            # radioGroupButtons("preds1","",
-                                            #                   choices = c(
-                                            #                     HTML("<b>Use Elevation, Soils & Climate</b><br>More text here"),
-                                            #                     HTML("<b>Use Remote Sensing Inputs</b><br>More text here")
-                                            #                   )),
-                                            
-                                            #map variable
-                                            radioGroupButtons("mapVar","Map Variable",
-                                                              choiceNames = c(
-                                                                HTML("<b>Mean Abundance</b>"),
-                                                                HTML("<b>Uncertainty (RSE)</b>")
-                                                              ),
-                                                              choiceValues = c("Mean", "RSE")),
-                                            
-                                            #year
-                                            radioGroupButtons("year1", "Set Year",
-                                                              choices = c(
-                                                                "2018" = "Hist",
-                                                                "2040-2069" = "2040",
-                                                                "2070-2099" = "2070"
-                                                              )),
-                                            
-                                            #RCP
-                                            radioGroupButtons("rcp1", "Set Climate Scenario",
-                                                              choices = varsTimeScenMap),
-                                            
-                                            
-                                   ),
-                                   tabPanel("Communities",
-                                            br(),
-                                            
-                                            #year
-                                            radioGroupButtons("year2", "Set Year",
-                                                              choices = c(
-                                                                "2018" = "historical",
-                                                                "2040-2069" = "2040_2069",
-                                                                "2070-2099" = "2070_2099"
-                                                              )),
-                                            
-                                            #RCP
-                                            radioGroupButtons("rcp2", "Set Climate Scenario",
-                                                              choices = varsTimeScen),
-                                            
-                                            #select which communities shown on map)
-                                            checkboxGroupButtons("CommBlocks2", "Choose a community:",
-                                                                 choiceNames =
-                                                                   list(list(icon("square","C1"), "Cascades an Sierra Nevada Forest"),#light gray 12
-                                                                        list(icon("square","C2"), "Central Basin and Range"),#dark gray 6
-                                                                        list(icon("square","C3"), "Central Forest/Grassland Transition"),#light teal 16
-                                                                        list(icon("square","C4"), "Colorado Rockies Forests"),#dark teal 5
-                                                                        list(icon("square","C5"), "Desert"),#light lavendar 9
-                                                                        list(icon("square","C6"), "Eastern Temperate Forests"),#dark lavendar 11
-                                                                        list(icon("square","C7"), "Great Basin Shrub Steppe/Colordo Plateau Shrublands"),#light brown 13
-                                                                        list(icon("square","C8"), "Marine and Mediterranean Forests"),#dark brown 19
-                                                                        list(icon("square","C9"), "NE Coastal Zone"),#light blue 18
-                                                                        list(icon("square","C10"), "NW Great Plains"),#dark blue 4
-                                                                        list(icon("square","C11"), "NW Great/Glaciated Plains"),#light green 7
-                                                                        list(icon("square","C12"), "New England-Acadian/Great Lakes Forest"),#dark green 14
-                                                                        list(icon("square","C13"), "Northern Tallgrass"),#light red 3
-                                                                        list(icon("square","C14"), "SE Conifer Forest"),#dark red 2
-                                                                        list(icon("square","C15"), "SE Conifer/Mixed Forest"),#light orange 20
-                                                                        list(icon("square","C16"), "SE Mixed Forest/Piney Woods"),#dark orange 1
-                                                                        list(icon("square","C17"), "SE Plains"),#light purple 17
-                                                                        list(icon("square","C18"), "Southern Tallgrass Prarie"),#dark purple 15
-                                                                        list(icon("square","C19"), "Tallgrass and Prarie Peninsula"),#light yellow 8
-                                                                        list(icon("square","C20"), "Western Short Grasslands")),#dark yellow 10
-                                                                 choiceValues =
-                                                                   list(12,6,16,5,9,11,13,19,18,4,7,14,3,2,20,1,17,15,8,10),#12,6,16,5,9,11,13,19,18,4,7,14,3,2,20,1,17,15,8,10
-                                                                 #inline = T,
-                                                                 direction = "vertical",
-                                                                 individual = TRUE,
-                                                                 selected = 1),
-                                            tags$style(".C1 {color:#cccccc"),
-                                            tags$style(".C2 {color:#686868"),
-                                            tags$style(".C3 {color:#9ed7c2"),
-                                            tags$style(".C4 {color:#00a884"),
-                                            tags$style(".C5 {color:#e8beff"),
-                                            tags$style(".C6 {color:#c500ff"),
-                                            tags$style(".C7 {color:#d7c29e"),
-                                            tags$style(".C8 {color:#895a44"),
-                                            tags$style(".C9 {color:#a6cee3"),
-                                            tags$style(".C10 {color:#1f79b5"),
-                                            tags$style(".C11 {color:#b1de8a"),
-                                            tags$style(".C12 {color:#33a12b"),
-                                            tags$style(".C13 {color:#fa9a98"),
-                                            tags$style(".C14 {color:#e3191c"),
-                                            tags$style(".C15 {color:#fcbf6f"),
-                                            tags$style(".C16 {color:#ff8000"),
-                                            tags$style(".C17 {color:#cab2d6"),
-                                            tags$style(".C18 {color:#693d99"),
-                                            tags$style(".C19 {color:#ffff99"),
-                                            tags$style(".C20 {color:#a8a800")
-                                            
-                                   )
-                                   
-                                 )
+                        tabPanel(
+                          "Species",
+                          sidebarLayout(
+                            position = "right",
+                            mainPanel(leaflet::leafletOutput("map", height = "85vh")),
+                            sidebarPanel(
+                              #br(),
+                              radioGroupButtons(
+                                "taxa1",
+                                "Choose Taxa Group",
+                                varsTaxa,
+                                #choices = c("Small Mammals", "Birds", "Beetles", "Trees"),
+                                
+                                individual = TRUE,
+                                selected = "NEON_Small-Mammals"
+                              ),
+                              #update list of species based on taxa selection)
+                              selectInput("specs1", "Choose Species",
+                                          varsGOacc3),
+                              hr(),
+                              
+                              #paste species name as header
+                              h3(em(textOutput("spText"))),
+                              
+                              
+                              p(textOutput("abunText")),
+                              
+                              hr(),
+                              
+                              # If split map view was implemented:
+                              # switchInput(inputId = "splitView", label = "Split Map View",
+                              #             labelWidth = "100px", onStatus = "success",
+                              #             offStatus = "danger",
+                              #             value = FALSE, inline = TRUE),
+                              
+                              #predictors (Not applicable for trees/beetles/new models)
+                              # radioGroupButtons("preds1","",
+                              #                   choices = c(
+                              #                     HTML("<b>Use Elevation, Soils & Climate</b><br>More text here"),
+                              #                     HTML("<b>Use Remote Sensing Inputs</b><br>More text here")
+                              #                   )),
+                              
+                              #map variable
+                              radioGroupButtons(
+                                "mapVar",
+                                "Map Variable",
+                                choiceNames = c(
+                                  HTML("<b>Mean Abundance</b>"),
+                                  HTML("<b>Uncertainty (RSE)</b>")
+                                ),
+                                choiceValues = c("Mean", "RSE")
+                              ),
+                              
+                              #year
+                              radioGroupButtons(
+                                "year1",
+                                "Set Year",
+                                choices = c(
+                                  "2018" = "Hist",
+                                  "2040-2069" = "2040",
+                                  "2070-2099" = "2070"
+                                )
+                              ),
+                              
+                              #RCP
+                              radioGroupButtons("rcp1", "Set Climate Scenario",
+                                                choices = varsTimeScenMap),
+                              
+                              
+                            )
+                          )
+                        ),
+                        tabPanel(
+                          "Communities",
+                          #br(),
+                          sidebarLayout(
+                            position = "right",
+                            mainPanel(leaflet::leafletOutput("map2", height = "85vh")),
+                            sidebarPanel(
+                              #year
+                              radioGroupButtons(
+                                "year2",
+                                "Set Year",
+                                choices = c(
+                                  "2018" = "hist",
+                                  "2040-2069" = "2040",
+                                  "2070-2099" = "2070"
+                                ),
+                                selected = "hist"
+                              ),
+                              
+                              #RCP
+                              radioGroupButtons("rcp2", "Set Climate Scenario",
+                                                choices = varsTimeScen,
+                                                selected = "rcp45"),
+                              #p("Select which communities are shown on map"),
+                              #actionButton("commLayers", "Update Map!"),
+                              
+                              #select which communities shown on map)
+                              checkboxGroupButtons(
+                                "CommBlocks2",
+                                "Choose a community:",
+                                choiceNames =
+                                  list(
+                                    list(icon("square", "C1"), "Cascades and Sierra Nevada Forest"),
+                                    #light gray 12
+                                    list(icon("square", "C2"), "Central Basin and Range"),
+                                    #dark gray 6
+                                    list(icon("square", "C3"), "Central Forest/Grassland Transition"),
+                                    #light teal 16
+                                    list(icon("square", "C4"), "Colorado Rockies Forests"),
+                                    #dark teal 5
+                                    list(icon("square", "C5"), "Desert"),
+                                    #light lavendar 9
+                                    list(icon("square", "C6"), "Eastern Temperate Forests"),
+                                    #dark lavendar 11
+                                    list(
+                                      icon("square", "C7"),
+                                      "Great Basin Shrub Steppe/Colordo Plateau Shrublands"
+                                    ),
+                                    #light brown 13
+                                    list(icon("square", "C8"), "Marine and Mediterranean Forests"),
+                                    #dark brown 19
+                                    list(icon("square", "C9"), "NE Coastal Zone"),
+                                    #light blue 18
+                                    list(icon("square", "C10"), "New England-Acadian/Great Lakes Forest"),
+                                    #dark blue 4
+                                    list(icon("square", "C11"), "Northern Tallgrass"),
+                                    #light green 7
+                                    list(icon("square", "C12"), "NW Great Plains"),
+                                    #dark green 14
+                                    list(icon("square", "C13"), "NW Great/Glaciated Plains"),
+                                    #light red 3
+                                    list(icon("square", "C14"), "SE Conifer Forest"),
+                                    #dark red 2
+                                    list(icon("square", "C15"), "SE Conifer/Mixed Forest"),
+                                    #light orange 20
+                                    list(icon("square", "C16"), "SE Mixed Forest/Piney Woods"),
+                                    #dark orange 1
+                                    list(icon("square", "C17"), "SE Plains"),
+                                    #light purple 17
+                                    list(icon("square", "C18"), "Southern Tallgrass Prarie"),
+                                    #dark purple 15
+                                    list(icon("square", "C19"), "Tallgrass and Prarie Peninsula"),
+                                    #light yellow 8
+                                    list(icon("square", "C20"), "Western Short Grasslands")
+                                  ),
+                                #dark yellow 10
+                                choiceValues =
+                                  list("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
+                                       "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
+                                       "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
+                                       "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
+                                       "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands"),
+                                  #list(12, 6, 16, 5, 9, 11, 13, 19, 18, 4, 7, 14, 3, 2, 20, 1, 17, 15, 8, 10),
+                                #12,6,16,5,9,11,13,19,18,4,7,14,3,2,20,1,17,15,8,10
+                                #inline = T,
+                                direction = "vertical",
+                                individual = TRUE,
+                                selected = c("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
+                                             "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
+                                             "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
+                                             "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
+                                             "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands")
+                              ),
+                              tags$style(".C1 {color:#cccccc"),
+                              tags$style(".C2 {color:#686868"),
+                              tags$style(".C3 {color:#9ed7c2"),
+                              tags$style(".C4 {color:#00a884"),
+                              tags$style(".C5 {color:#e8beff"),
+                              tags$style(".C6 {color:#c500ff"),
+                              tags$style(".C7 {color:#d7c29e"),
+                              tags$style(".C8 {color:#895a44"),
+                              tags$style(".C9 {color:#a6cee3"),
+                              tags$style(".C10 {color:#1f79b5"),
+                              tags$style(".C11 {color:#b1de8a"),
+                              tags$style(".C12 {color:#33a12b"),
+                              tags$style(".C13 {color:#fa9a98"),
+                              tags$style(".C14 {color:#e3191c"),
+                              tags$style(".C15 {color:#fcbf6f"),
+                              tags$style(".C16 {color:#ff8000"),
+                              tags$style(".C17 {color:#cab2d6"),
+                              tags$style(".C18 {color:#693d99"),
+                              tags$style(".C19 {color:#ffff99"),
+                              tags$style(".C20 {color:#a8a800")
+                              
+                            )
+                            
+                          )
+                        )
+                        
+                        
                       )
                       
-                        
-                      )
-                        
-                      ))),
+                      ),
              
              ## models ---------------------------------------------------------------------------
              navbarMenu("Species Models",
@@ -1629,6 +1700,7 @@ server <- function(input, output, session) {
   
   # maps ------------------------------------------------------------------------------
   
+ ## species map --------------------------------------------------------------
   
   #update species list based on selected taxa
   observe({
@@ -1846,7 +1918,7 @@ server <- function(input, output, session) {
       addMapPane("left", zIndex = 0) %>%
       addMapPane("right", zIndex = 0) %>%
       addTiles(options = pathOptions(pane = "left")) %>% 
-      setView(lat = 39, lng = -89, zoom = 3.5) 
+      setView(lat = 39, lng = -94, zoom = 3.5) 
   })
   
   
@@ -1965,6 +2037,128 @@ server <- function(input, output, session) {
   #   
   # })
   # 
+  
+  ## community map --------
+  
+  
+  #get communities layer
+  
+  commMap <- reactive({
+
+     if(input$rcp2 == "rcp45"){
+    
+       if(input$year2 == "hist"){
+         m <- layers[[1]]
+       } else if(input$year2 == "2040"){
+         m <- layers[[2]]
+       } else if(input$year2 == "2070"){
+         m <- layers[[3]]
+       }
+     } else if(input$rcp2 == "rcp85"){
+       if(input$year2 == "hist"){
+         m <- layers[[4]]
+       } else if(input$year2 == "2040"){
+         m <- layers[[5]]
+       } else if(input$year2 == "2070"){
+         m <- layers[[6]]
+       }
+    
+     }
+    
+    m_filter <- m %>% 
+      filter(Name %in% input$CommBlocks2)
+    
+    return(m_filter)
+
+  })
+
+  commPal <- colorFactor(c("#cccccc",
+                           "#686868",
+                           "#9ed7c2",
+                           "#00a884",
+                           "#e8beff",
+                           "#c500ff",
+                           "#d7c29e",
+                           "#895a44",
+                           "#a6cee3",
+                           "#1f79b5",
+                           "#b1de8a",
+                           "#33a12b",
+                           "#fa9a98",
+                           "#e3191c",
+                           "#fcbf6f",
+                           "#ff8000",
+                           "#cab2d6",
+                           "#693d99",
+                           "#ffff99",
+                           "#a8a800"), 
+                         c("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
+                           "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
+                           "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
+                           "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
+                           "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands"))
+  
+  
+  # set up base map
+  output$map2 <- renderLeaflet({
+    leaflet() %>% 
+      addTiles() %>% 
+      setView(lat = 39, lng = -94, zoom = 3.5) %>% 
+      addPolygons(data = commMap(), group = "communities", color = ~commPal(Name),
+                  stroke = FALSE, fillOpacity = 1)
+  })
+  
+  #  observeEvent(input$commLayers, {
+  #    
+  #    leafletProxy("map2") %>%
+  #        clearGroup("communities")
+  #             #clearControls() %>%
+  #             #addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
+  #            addPolygons(data = filter(commMap(), Name %in% input$CommBlocks2),  color = ~commPal(Name),
+  #                        stroke = FALSE, fillOpacity = 1) 
+  # #  
+  #  })
+  
+  # observe({  
+  #   
+  #   if (is.null(commMap())) {
+  #     return(NULL)
+  #   } else {
+  #     leafletProxy("map2") %>%
+  #       removeImage("A") %>%
+  #       #clearControls() %>%
+  #       #addRasterImage2(reactiveRas(), colors = pal(), layerId = "A", project = TRUE, options = tileOptions(pane = "left")) %>%
+  #       addPolygons(data = commMap(), layerId = "A",  color = ~commPal(Name),
+  #                   stroke = FALSE, fillOpacity = 1) 
+        #addLegend(
+          #pal = pal(),
+          #values = values(reactiveRas()),
+          # labFormat = function(type, cuts, p) {
+          #   paste0(c(
+          #     "0-1",
+          #     "1-2",
+          #     "2-3",
+          #     "3-4",
+          #     "4-5",
+          #     "5-6",
+          #     "6-7",
+          #     "7-8",
+          #     "8-9",
+          #     ">9"
+          #   ))
+          # }
+        #   colors = colors(),
+        #   labels = labels(),
+        #   title = ifelse(input$mapVar == "Mean",
+        #                  HTML("Abundance-weighted<br>Habitat Suitability<br>"),
+        #                  HTML("Uncertainty (RSE)<br>")),
+        #   
+        #   position = "bottomleft",
+        #   opacity = 1
+        # )
+  #   }
+  # })
+  
   
   # models -------------------------------------------------------------------------------
   
