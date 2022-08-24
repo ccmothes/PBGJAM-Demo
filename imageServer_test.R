@@ -204,7 +204,7 @@ commPal <- colorFactor(c("#cccccc",
                          "#cab2d6",
                          "#693d99",
                          "#ffff99",
-                         "#a8a800"), hist_45$Name)
+                         "#a8a800"), layers[[1]]$Name)
 
 leaflet() %>% 
   addTiles() %>% 
@@ -230,7 +230,18 @@ save(layers, file = "PBGJAM-ShinyDemoFull/data/comm_layers.RData")
 
 #if want to simplify layers...
 
-layer_test <- layers[[1]] %>% 
-  st_make_valid() %>% 
-  st_simplify(preserveTopology = TRUE) %>% 
-  ms_simplify()
+layers_simplify <- vector("list", length = 6)
+
+for (i in 1:length(layers)){
+  
+  layers_simplify[[i]] <- layers[[i]] %>% 
+    st_make_valid() %>% 
+    st_simplify(preserveTopology = TRUE, dTolerance = 0.01) %>% 
+    ms_simplify()
+  
+  print(i)
+  
+}
+
+save(layers_simplify, file = "PBGJAM-ShinyDemoFull/data/comm_layers_simple.RData")
+
