@@ -114,7 +114,11 @@ varsGObetas3 <- c("Common name" = "vernacularName",
 
 varsGObetas3b <- c("Scientific name" = "scientificName")
 
-load("data/comm_layers.RData")
+#load("data/comm_layers.RData")
+load("data/comm_layers_simple.RData")
+layers <- layers_simplify
+
+
 
 
 #pbgjam logo
