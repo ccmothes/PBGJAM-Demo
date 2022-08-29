@@ -118,6 +118,10 @@ varsGObetas3b <- c("Scientific name" = "scientificName")
 load("data/comm_layers_simple.RData")
 layers <- layers_simplify
 
+#get community layers
+names45 <- layers[[3]]$Name # need to use 3rd layers, one of communities is lost in first and second when simplifying
+names85 <- layers[[6]]$Name
+
 
 
 
@@ -152,7 +156,7 @@ ui <-
                bslib::bs_add_rules(sass::sass_file("www/style.scss")),
              
              ## Homepage -------------------------------------------------------
-             tabPanel("Home",
+             tabPanel("Home", 
                       tags$div(class = "container-fluid1",
                       tags$head(
                         tags$link(rel = "stylesheet", type = "text/css", href = "homepage.css")
@@ -588,7 +592,7 @@ ui <-
              ),
              
              ## maps --------------------------------------------------------
-             tabPanel("Species Maps",
+             tabPanel("Species Maps", value = "mapper",
                       # div(class = "outer"),
                       #sidebarLayout(
                       #mainPanel(
@@ -697,6 +701,9 @@ ui <-
                             position = "right",
                             mainPanel(leaflet::leafletOutput("map2", height = "85vh")),
                             sidebarPanel(
+                              p("Text about communities maps"),
+                              #jump to more detail on communities models
+                              actionButton("jumpToComm", "More detail on Communities maps"),
                               #year
                               radioGroupButtons(
                                 "year2",
@@ -716,73 +723,118 @@ ui <-
                               #p("Select which communities are shown on map"),
                               #actionButton("commLayers", "Update Map!"),
                               
-                              #select which communities shown on map)
-                              checkboxGroupButtons(
-                                "CommBlocks2",
-                                "Choose a community:",
-                                choiceNames =
-                                  list(
-                                    list(icon("square", "C1"), "Cascades and Sierra Nevada Forest"),
-                                    #light gray 12
-                                    list(icon("square", "C2"), "Central Basin and Range"),
-                                    #dark gray 6
-                                    list(icon("square", "C3"), "Central Forest/Grassland Transition"),
-                                    #light teal 16
-                                    list(icon("square", "C4"), "Colorado Rockies Forests"),
-                                    #dark teal 5
-                                    list(icon("square", "C5"), "Desert"),
-                                    #light lavendar 9
-                                    list(icon("square", "C6"), "Eastern Temperate Forests"),
-                                    #dark lavendar 11
-                                    list(
-                                      icon("square", "C7"),
-                                      "Great Basin Shrub Steppe/Colordo Plateau Shrublands"
-                                    ),
-                                    #light brown 13
-                                    list(icon("square", "C8"), "Marine and Mediterranean Forests"),
-                                    #dark brown 19
-                                    list(icon("square", "C9"), "NE Coastal Zone"),
-                                    #light blue 18
-                                    list(icon("square", "C10"), "New England-Acadian/Great Lakes Forest"),
-                                    #dark blue 4
-                                    list(icon("square", "C11"), "Northern Tallgrass"),
-                                    #light green 7
-                                    list(icon("square", "C12"), "NW Great Plains"),
-                                    #dark green 14
-                                    list(icon("square", "C13"), "NW Great/Glaciated Plains"),
-                                    #light red 3
-                                    list(icon("square", "C14"), "SE Conifer Forest"),
-                                    #dark red 2
-                                    list(icon("square", "C15"), "SE Conifer/Mixed Forest"),
-                                    #light orange 20
-                                    list(icon("square", "C16"), "SE Mixed Forest/Piney Woods"),
-                                    #dark orange 1
-                                    list(icon("square", "C17"), "SE Plains"),
-                                    #light purple 17
-                                    list(icon("square", "C18"), "Southern Tallgrass Prarie"),
-                                    #dark purple 15
-                                    list(icon("square", "C19"), "Tallgrass and Prarie Peninsula"),
-                                    #light yellow 8
-                                    list(icon("square", "C20"), "Western Short Grasslands")
-                                  ),
-                                #dark yellow 10
-                                choiceValues =
-                                  list("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
-                                       "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
-                                       "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
-                                       "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
-                                       "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands"),
-                                  #list(12, 6, 16, 5, 9, 11, 13, 19, 18, 4, 7, 14, 3, 2, 20, 1, 17, 15, 8, 10),
-                                #12,6,16,5,9,11,13,19,18,4,7,14,3,2,20,1,17,15,8,10
-                                #inline = T,
-                                direction = "vertical",
-                                individual = TRUE,
-                                selected = c("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
-                                             "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
-                                             "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
-                                             "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
-                                             "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands")
-                              ),
+                              #select which communities shown on map
+                              conditionalPanel("input.rcp2 == 'rcp45'",
+                                               checkboxGroupButtons(
+                                                 "commBlocks45_2",
+                                                 "Choose a community:",
+                                                 choiceNames =
+                                                   list(
+                                                     list(icon("square", "C1"), "Cascades and Sierra Nevada Forest"),
+                                                     #light gray 12
+                                                     list(icon("square", "C2"), "Central Basin and Range"),
+                                                     #dark gray 6
+                                                     list(icon("square", "C3"), "Central Forest/Grassland Transition"),
+                                                     #light teal 16
+                                                     list(icon("square", "C4"), "Colorado Rockies Forests"),
+                                                     #dark teal 5
+                                                     list(icon("square", "C5"), "Desert"),
+                                                     #light lavendar 9
+                                                     list(icon("square", "C6"), "Eastern Temperate Forests"),
+                                                     #dark lavendar 11
+                                                     list(
+                                                       icon("square", "C7"),
+                                                       "Great Basin Shrub Steppe/Colordo Plateau Shrublands"
+                                                     ),
+                                                     #light brown 13
+                                                     list(icon("square", "C8"), "Marine and Mediterranean Forests"),
+                                                     #dark brown 19
+                                                     list(icon("square", "C9"), "NE Coastal Zone"),
+                                                     #light blue 18
+                                                     list(icon("square", "C10"), "New England-Acadian/Great Lakes Forest"),
+                                                     #dark blue 4
+                                                     list(icon("square", "C11"), "Northern Tallgrass"),
+                                                     #light green 7
+                                                     list(icon("square", "C12"), "NW Great Plains"),
+                                                     #dark green 14
+                                                     list(icon("square", "C13"), "NW Great/Glaciated Plains"),
+                                                     #light red 3
+                                                     list(icon("square", "C14"), "SE Conifer Forest"),
+                                                     #dark red 2
+                                                     list(icon("square", "C15"), "SE Conifer/Mixed Forest"),
+                                                     #light orange 20
+                                                     list(icon("square", "C16"), "SE Mixed Forest/Piney Woods"),
+                                                     #dark orange 1
+                                                     list(icon("square", "C17"), "SE Plains"),
+                                                     #light purple 17
+                                                     list(icon("square", "C18"), "Southern Tallgrass Prarie"),
+                                                     #dark purple 15
+                                                     list(icon("square", "C19"), "Tallgrass and Prarie Peninsula"),
+                                                     #light yellow 8
+                                                     list(icon("square", "C20"), "Western Short Grasslands")
+                                                   ),
+                                                 #dark yellow 10
+                                                 choiceValues = names45,
+                                                 direction = "vertical",
+                                                 individual = TRUE,
+                                                 selected = names45
+                                               )),
+                              conditionalPanel("input.rcp2 == 'rcp85'",
+                                               checkboxGroupButtons(
+                                                 "commBlocks85_2",
+                                                 "Choose a community:",
+                                                 choiceNames =
+                                                   list(
+                                                     list(icon("square", "D1"), "Appalachian and Cascade Forests"),
+                                                     #light gray 12
+                                                     list(icon("square", "D2"), "Cascades, Sierra Nevada, and Northern Rockies"),
+                                                     #dark gray 6
+                                                     list(icon("square", "D3"), "Central Basin and Range"),
+                                                     #light teal 16
+                                                     list(icon("square", "D4"), "Central Forest/Grassland Transition"),
+                                                     #dark teal 5
+                                                     list(icon("square", "D5"), "Cold Deserts"),
+                                                     #light lavendar 9
+                                                     list(icon("square", "D6"), "Deserts"),
+                                                     #dark lavendar 11
+                                                     list(
+                                                       icon("square", "D7"),
+                                                       "Eastern Temperate Forests"
+                                                     ),
+                                                     #light brown 13
+                                                     list(icon("square", "D8"), "Great Basin Shrub Steppe/Colorado Plateau Shrublands"),
+                                                     #dark brown 19
+                                                     list(icon("square", "D9"), "NE Coastal Zone"),
+                                                     #light blue 18
+                                                     list(icon("square", "D10"), "Nebraska Sand Hills"),
+                                                     #dark blue 4
+                                                     list(icon("square", "D11"), "New England-Acadian Forest"),
+                                                     #light green 7
+                                                     list(icon("square", "D12"), "Northern Lakes and Forests"),
+                                                     #dark green 14
+                                                     list(icon("square", "D13"), "NW Great/Glaciated Plains"),
+                                                     #light red 3
+                                                     list(icon("square", "D14"), "SE Conifer/Mixed Forest"),
+                                                     #dark red 2
+                                                     list(icon("square", "D15"), "SE Mixed Forest/Piney Woods"),
+                                                     #light orange 20
+                                                     list(icon("square", "D16"), "SE Plains"),
+                                                     #dark orange 1
+                                                     list(icon("square", "D17"), "South Central Semi-arid Prairies"),
+                                                     #light purple 17
+                                                     list(icon("square", "D18"), "Southern California Mountains and Coastal Plain"),
+                                                     #dark purple 15
+                                                     list(icon("square", "D19"), "Southern Tallgrass Prairie"),
+                                                     #light yellow 8
+                                                     list(icon("square", "D20"), "Western Short Grasslands")
+                                                   ),
+                                                 #dark yellow 10
+                                                 choiceValues = names85,
+                                                 direction = "vertical",
+                                                 individual = TRUE,
+                                                 selected = names85
+                                               )),
+
                               tags$style(".C1 {color:#cccccc"),
                               tags$style(".C2 {color:#686868"),
                               tags$style(".C3 {color:#9ed7c2"),
@@ -802,7 +854,27 @@ ui <-
                               tags$style(".C17 {color:#cab2d6"),
                               tags$style(".C18 {color:#693d99"),
                               tags$style(".C19 {color:#ffff99"),
-                              tags$style(".C20 {color:#a8a800")
+                              tags$style(".C20 {color:#a8a800"),
+                              tags$style(".D1 {color:#cccccc"),
+                              tags$style(".D2 {color:#686868"),
+                              tags$style(".D3 {color:#9ed7c2"),
+                              tags$style(".D4 {color:#00a884"),
+                              tags$style(".D5 {color:#e8beff"),
+                              tags$style(".D6 {color:#c500ff"),
+                              tags$style(".D7 {color:#d7c29e"),
+                              tags$style(".D8 {color:#895a44"),
+                              tags$style(".D9 {color:#a6cee3"),
+                              tags$style(".D10 {color:#1f79b5"),
+                              tags$style(".D11 {color:#b1de8a"),
+                              tags$style(".D12 {color:#33a12b"),
+                              tags$style(".D13 {color:#fa9a98"),
+                              tags$style(".D14 {color:#e3191c"),
+                              tags$style(".D15 {color:#fcbf6f"),
+                              tags$style(".D16 {color:#ff8000"),
+                              tags$style(".D17 {color:#cab2d6"),
+                              tags$style(".D18 {color:#693d99"),
+                              tags$style(".D19 {color:#ffff99"),
+                              tags$style(".D20 {color:#a8a800")
                               
                             )
                             
@@ -815,7 +887,7 @@ ui <-
                       ),
              
              ## models ---------------------------------------------------------------------------
-             navbarMenu("Species Models",
+             navbarMenu(title = "Species Models",
                         tabPanel("Communities",
                                  sidebarLayout(position = "left",
                                                sidebarPanel(width = 6,
@@ -2044,6 +2116,11 @@ server <- function(input, output, session) {
   
   ## community map --------
   
+  #jump to communities models
+  observeEvent(input$jumpToComm, {
+    updateTabsetPanel(session, "nav",
+                      selected = "models")
+  })
   
   #get communities layer
   
@@ -2058,6 +2135,10 @@ server <- function(input, output, session) {
        } else if(input$year2 == "2070"){
          m <- layers[[3]]
        }
+       
+       m_filter <- m %>% 
+         filter(Name %in% input$commBlocks45_2)
+       
      } else if(input$rcp2 == "rcp85"){
        if(input$year2 == "hist"){
          m <- layers[[4]]
@@ -2066,49 +2147,78 @@ server <- function(input, output, session) {
        } else if(input$year2 == "2070"){
          m <- layers[[6]]
        }
+       
+       m_filter <- m %>% 
+         filter(Name %in% input$commBlocks85_2)
     
      }
     
-    m_filter <- m %>% 
-      filter(Name %in% input$CommBlocks2)
     
     return(m_filter)
 
   })
 
-  commPal <- colorFactor(c("#cccccc",
-                           "#686868",
-                           "#9ed7c2",
-                           "#00a884",
-                           "#e8beff",
-                           "#c500ff",
-                           "#d7c29e",
-                           "#895a44",
-                           "#a6cee3",
-                           "#1f79b5",
-                           "#b1de8a",
-                           "#33a12b",
-                           "#fa9a98",
-                           "#e3191c",
-                           "#fcbf6f",
-                           "#ff8000",
-                           "#cab2d6",
-                           "#693d99",
-                           "#ffff99",
-                           "#a8a800"), 
-                         c("Cascades and Sierra Nevada Forest", "Central Basin and Range", "Central Forest/Grassland Transition",
-                           "Colorado Rockies Forests", "Desert", "Eastern Temperate Forests", "Great Basin Shrub Steppe/Colorado Plateau Shrublands",
-                           "Marine and Mediterranean Forests", "NE Coastal Zone", "New England-Acadian/Great Lakes Forest", "Northern Tallgrass",
-                           "NW Great Plains", "NW Great/Glaciated Plains", "SE Conifer Forest", "SE Conifer/Mixed Forest", "SE Mixed Forest/Piney Woods",
-                           "SE Plains", "Southern Tallgrass Prairie", "Tallgrass and Prairie Peninsula", "Western Short Grasslands"))
-  
+  commPal <- reactive({
+    
+    if(input$rcp2 == 'rcp45'){
+      
+      colorFactor(c("#cccccc",
+                    "#686868",
+                    "#9ed7c2",
+                    "#00a884",
+                    "#e8beff",
+                    "#c500ff",
+                    "#d7c29e",
+                    "#895a44",
+                    "#a6cee3",
+                    "#1f79b5",
+                    "#b1de8a",
+                    "#33a12b",
+                    "#fa9a98",
+                    "#e3191c",
+                    "#fcbf6f",
+                    "#ff8000",
+                    "#cab2d6",
+                    "#693d99",
+                    "#ffff99",
+                    "#a8a800"), 
+                  names45)
+
+    } else {
+      
+      colorFactor(c("#cccccc",
+                    "#686868",
+                    "#9ed7c2",
+                    "#00a884",
+                    "#e8beff",
+                    "#c500ff",
+                    "#d7c29e",
+                    "#895a44",
+                    "#a6cee3",
+                    "#1f79b5",
+                    "#b1de8a",
+                    "#33a12b",
+                    "#fa9a98",
+                    "#e3191c",
+                    "#fcbf6f",
+                    "#ff8000",
+                    "#cab2d6",
+                    "#693d99",
+                    "#ffff99",
+                    "#a8a800"), 
+                  names85)
+      
+    }
+    
+  })
+    
   
   # set up base map
   output$map2 <- renderLeaflet({
     leaflet() %>% 
       addTiles() %>% 
       setView(lat = 39, lng = -94, zoom = 3.5) %>% 
-      addPolygons(data = commMap(), group = "communities", color = ~commPal(Name),
+      addPolygons(data = commMap(), group = "communities", color = ~commPal()(Name),
                   stroke = FALSE, fillOpacity = 1)
   })
   
