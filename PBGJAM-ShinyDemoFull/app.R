@@ -134,6 +134,7 @@ corner_element = HTML(paste0('<a href=',shQuote("https://pbgjam.env.duke.edu/"),
 
 ui <- 
   navbarPage(id = "nav",
+        
              tags$a(
                href="https://pbgjam.env.duke.edu/",
                tags$img(src="pbgjam_logo.png",
@@ -592,7 +593,7 @@ ui <-
              ),
              
              ## maps --------------------------------------------------------
-             tabPanel("Species Maps", value = "mapper",
+             tabPanel("Species Maps",
                       # div(class = "outer"),
                       #sidebarLayout(
                       #mainPanel(
@@ -623,7 +624,7 @@ ui <-
                         type = "tabs",
                         
                         tabPanel(
-                          "Species",
+                          "Species Maps",
                           sidebarLayout(
                             position = "right",
                             mainPanel(leaflet::leafletOutput("map", height = "85vh")),
@@ -695,15 +696,16 @@ ui <-
                           )
                         ),
                         tabPanel(
-                          "Communities",
+                          "Community Maps",
                           #br(),
                           sidebarLayout(
                             position = "right",
                             mainPanel(leaflet::leafletOutput("map2", height = "85vh")),
                             sidebarPanel(
-                              p("Text about communities maps"),
+                              HTML("<p>Communities are identified using Gaussian Mixture Modeling with the <a href = 'https://cran.r-project.org/web/packages/mclust/vignettes/mclust.html'> mclust package in R </a>. Clustering is done on relative abundance-weighted habitat suitability. Communities with similar relative abundance-weighted habitat suitability across maps share the same color</p>"),
                               #jump to more detail on communities models
-                              actionButton("jumpToComm", "More detail on Communities maps"),
+                              actionButton("jumpToComm", "More detail on Communities"),
+                              hr(),
                               #year
                               radioGroupButtons(
                                 "year2",
@@ -727,7 +729,7 @@ ui <-
                               conditionalPanel("input.rcp2 == 'rcp45'",
                                                checkboxGroupButtons(
                                                  "commBlocks45_2",
-                                                 "Choose a community:",
+                                                 "Turn Communities On/Off:",
                                                  choiceNames =
                                                    list(
                                                      list(icon("square", "C1"), "Cascades and Sierra Nevada Forest"),
@@ -1031,7 +1033,10 @@ ui <-
                                           plotOutput("mapCommunitiesHist"),
                                           #leafletOutput("mapCommunitiesHist",height = 300, width = 600),
                                           tags$h5("Future"),
-                                          plotOutput("mapCommunitiesFut")
+                                          plotOutput("mapCommunitiesFut"),
+                                          tags$style(type="text/css",
+                                                     ".shiny-plot-output { text-align: center; height: auto }"
+                                          )
                                           #leafletOutput("mapCommunitiesFut",height = 300, width = 600)
                                    )
                                  )
@@ -2119,7 +2124,7 @@ server <- function(input, output, session) {
   #jump to communities models
   observeEvent(input$jumpToComm, {
     updateTabsetPanel(session, "nav",
-                      selected = "models")
+                      selected = "Communities")
   })
   
   #get communities layer
@@ -2443,7 +2448,9 @@ server <- function(input, output, session) {
         
       }
       
-    },height = 450,bg="transparent")
+    },
+    #height = 450,
+    bg="transparent")
     
   })
   

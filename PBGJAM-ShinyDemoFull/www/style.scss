@@ -1,20 +1,35 @@
 @import url("https://fonts.googleapis.com/css?family=Fira+Sans:regular,500,600,700%7CRoboto:regular,500,700"); 
 
-/* Highlight group selection headers in indicator drop down*/
+
+
+/* Highlight group selection headers in indicator drop down */
 .dropdown-header{
   color: #000000 !important;
   background-color: #e0e0d5 !important;
   font-weight: bold
 }
 
-/* Make vector plot button red outline */
-button#plotVec.btn.btn-default.action-button.shiny-bound-input {
+/* Make vector plot button red outline  */
+button#plotVec.btn.action-button {
   border-color: indianred !important;
-    margin-left: 1em !important;
 }
+
+/* Make detail on communities button gray outline */
+
+button#jumpToComm.btn.action-button {
+  border-color: darkgray !important;
+}
+
 
 /* Increase size of text in navbar*/
 .navbar ul.nav.navbar-nav>li>a {
   font-size: 16px;
 }
 
+
+/* Color time animation slider button */
+
+rect.slider-grip-rect {
+  fill: indianred !important;
+  stroke: indianred!important;
+}

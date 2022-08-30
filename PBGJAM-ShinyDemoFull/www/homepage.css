@@ -261,12 +261,12 @@ div.col-sm-3.specs {
 }
 
 .climatedata img {
-  width: 300px !important;
+  /*width: 300px !important;*/
   margin-top: 5em !important;
 }
 
 .biodiversity img {
-  width: 300px !important;
+ /* width: 300px !important; */
   margin-top: 5em !important;
 }
 
@@ -295,6 +295,8 @@ div.col-sm-3.specs {
 .datatabs ul.nav.nav-tabs {
     justify-content: center;
 }
+
+
 
 /* community section */
 
@@ -326,7 +328,7 @@ div.col-sm-3.specs {
 div.row.community {
   display: flex;
   justify-content: center;
-  /*flex-direction: column;
+  /*flex-direction: column !important; */
   /*align-items: flex-end;*/
   margin: auto;
 }
