@@ -160,14 +160,27 @@ leaflet() %>%
 
 
 #THIS WORKS !!!!!!!!!!!!!#
-url <- "https://tiles.arcgis.com/tiles/KNdRU5cN6ENqCTjk/arcgis/rest/services/B_mean_selenoPlanip_hist/MapServer/tile/{z}/{y}/{x}"
+url <- "https://https://tiles.arcgis.com/tiles/swlKRWoduvVuwMcX/arcgis/rest/services/RSE_RCP85_2070_Zapus_princeps/MapServer/tile/{z}/{y}/{x}"
 
 
 #had to set view/zoom to see in viewer pane. Showed up when scrolling in on browser window
 leaflet() %>% 
   addTiles() %>% 
   setView(lat = 39, lng = -86, zoom = 3.5) %>% 
-  addTiles(url)
+  addTiles(url, options=tileOptions(maxNativeZoom = 6))
+
+
+url <- "https://tiledimageservices1.arcgis.com/KNdRU5cN6ENqCTjk/arcgis/rest/services/RCP45_2018/ImageServer/tile/{z}/{y}/{x}"
+
+
+
+leaflet() %>% 
+  addTiles() %>% 
+  setView(lat = 39, lng = -86, zoom = 3.5) %>% 
+  addTiles(url, options=tileOptions(maxNativeZoom = 6))
+
+
+url <- "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer/tile/13/2990/2289"
 
 
 
@@ -244,4 +257,8 @@ for (i in 1:length(layers)){
 }
 
 save(layers_simplify, file = "PBGJAM-ShinyDemoFull/data/comm_layers_simple.RData")
+
+
+
+
 

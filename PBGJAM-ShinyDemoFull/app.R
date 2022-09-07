@@ -211,16 +211,24 @@ ui <-
                                       
                                column(3, class = "specs", tags$img(src= 'beetles.png',
                                                   title='Beetle photo'), align = 'center',
-                                      h5("Beetles")),
+                                      h5("Beetles"),
+                                      actionButton("beetleMaps", "Maps"),
+                                      actionButton("beetleModels", "Models")),
                                column(3, class = "specs", tags$img(src= 'birds.jpg',
                                                   title='Bird photo'), align = 'center',
-                                      h5("Birds")),
+                                      h5("Birds"),
+                                      actionButton("birdMaps", "Maps"),
+                                      actionButton("birdModels", "Models")),
                                column(3, class = "specs", tags$img(src= 'mammals.jpg',
                                                   title='Mammal photo'), align = 'center',
-                                      h5("Mammals")),
+                                      h5("Mammals"),
+                                      actionButton("mammalMaps", "Maps"),
+                                      actionButton("mammalModels", "Models")),
                                column(3, class = "specs", tags$img(src= 'trees.png',
                                                   title='Tree photo'), align = 'center',
-                                      h5("Trees"))))),
+                                      h5("Trees"),
+                                      actionButton("treeMaps", "Maps"),
+                                      actionButton("treeModels", "Models"))))),
                       fluidRow(class = "data",
                                column(10,
                                fluidRow(class = "split2",
@@ -1783,6 +1791,45 @@ server <- function(input, output, session) {
   
  ## species map --------------------------------------------------------------
   
+ # Jump to maps tab from homepage buttons
+ 
+ observeEvent(input$beetleMaps, {
+   
+   updateTabsetPanel(session, "nav",
+                     selected = "Species Maps")
+   
+   updateRadioGroupButtons(session, "taxa1",
+                     selected = "NEON_Beetles")
+ })
+ 
+ observeEvent(input$birdMaps, {
+   
+   updateTabsetPanel(session, "nav",
+                     selected = "Species Maps")
+   
+   updateRadioGroupButtons(session, "taxa1",
+                           selected = "BBS-NEON_Breeding-Birds")
+ })
+ 
+ observeEvent(input$mammalMaps, {
+   
+   updateTabsetPanel(session, "nav",
+                     selected = "Species Maps")
+   
+   updateRadioGroupButtons(session, "taxa1",
+                           selected = "NEON_Small-Mammals")
+ })
+ 
+ observeEvent(input$treeMaps, {
+   
+   updateTabsetPanel(session, "nav",
+                     selected = "Species Maps")
+   
+   updateRadioGroupButtons(session, "taxa1",
+                           selected = "FIA_trees")
+ })
+ 
+ 
   #update species list based on selected taxa
   observe({
     
@@ -2280,6 +2327,44 @@ server <- function(input, output, session) {
   
   
   # models -------------------------------------------------------------------------------
+  
+  ## go to models page from homepage buttons
+  
+  observeEvent(input$beetleModels, {
+    
+    updateTabsetPanel(session, "nav",
+                      selected = "Species")
+    
+    updateSelectInput(session, "taxa",
+                      selected = "NEON_Beetles")
+  })
+  
+  observeEvent(input$birdModels, {
+    
+    updateTabsetPanel(session, "nav",
+                      selected = "Species")
+    
+    updateSelectInput(session, "taxa",
+                      selected = "BBS-NEON_Breeding-Birds")
+  })
+  
+  observeEvent(input$mammalModels, {
+    
+    updateTabsetPanel(session, "nav",
+                      selected = "Species")
+    
+    updateSelectInput(session, "taxa",
+                      selected = "NEON_Small-Mammals")
+  })
+  
+  observeEvent(input$treeModels, {
+    
+    updateTabsetPanel(session, "nav",
+                      selected = "Species")
+    
+    updateSelectInput(session, "taxa",
+                      selected = "FIA_trees")
+  })
   
   # pulled from Amanda's code
   
