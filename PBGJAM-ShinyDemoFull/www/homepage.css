@@ -22,7 +22,7 @@
 div.row.header {
     background-image: url(bird_background.png);
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: top;
     background-size: cover;
     height: 63em;
     margin-top: -2em;
@@ -145,6 +145,17 @@ div.row.speciesBlock {
     grid-template-columns: repeat(4, 1fr);
 }
 
+/* make speciesBlock column in mobile view */
+
+@media only screen and (max-width: 768px) {
+  .row.speciesBlock {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    padding: 1em;
+    grid-row-gap: 100px;
+  }
+}
+
 /* add shaddow to buttons */
 div.col-sm-3.specs {
     border-radius: 8px;
@@ -154,6 +165,7 @@ div.col-sm-3.specs {
     text-align: center;
     /*margin-left: auto;*/
     max-width: fit-content;
+    padding: 15px;
 }
 
 
@@ -261,12 +273,12 @@ div.col-sm-3.specs {
 }
 
 .climatedata img {
-  width: 300px !important;
+  /*width: 300px !important;*/
   margin-top: 5em !important;
 }
 
 .biodiversity img {
-  width: 300px !important;
+ /* width: 300px !important; */
   margin-top: 5em !important;
 }
 
@@ -295,6 +307,8 @@ div.col-sm-3.specs {
 .datatabs ul.nav.nav-tabs {
     justify-content: center;
 }
+
+
 
 /* community section */
 
@@ -326,7 +340,7 @@ div.col-sm-3.specs {
 div.row.community {
   display: flex;
   justify-content: center;
-  /*flex-direction: column;
+  /*flex-direction: column !important; */
   /*align-items: flex-end;*/
   margin: auto;
 }
