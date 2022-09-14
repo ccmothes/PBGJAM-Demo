@@ -134,7 +134,6 @@ corner_element = HTML(paste0('<a href=',shQuote("https://pbgjam.env.duke.edu/"),
 
 ui <- 
   navbarPage(id = "nav",
-        
              tags$a(
                href="https://pbgjam.env.duke.edu/",
                tags$img(src="pbgjam_logo.png",
@@ -143,7 +142,10 @@ ui <-
                height="20%"
              ),
              #stop map elements from covering drop down menus
-             tags$head(tags$style('.dropdown-menu {z-index: 10000 !important}')),
+             tags$head(tags$style('.dropdown-menu {z-index: 10000 !important}'),
+                       #embed google analytics script
+                       tags$head(includeHTML("google-analytics.html"))
+             ),
              theme = bslib::bs_theme(
                version = 4,
                bootswatch = "sandstone",
@@ -1874,13 +1876,13 @@ server <- function(input, output, session) {
     if(input$specs1 == "s1"){
       return(NULL)
     } else if(input$taxa1 == "FIA_trees"){
-      return("Abundance-weighted habitat suitability: basal area (m^2) per hectare")
+      return("Abundance = basal area (m^2) per hectare")
     } else if(input$taxa1 == "NEON_Small-Mammals"){
-      return("Abundance-weighted habitat suitability per 100 trap nights")
+      return("Abundance = Small Mammals per 100 trap nights")
     } else if(input$taxa1 == "BBS-NEON_Breeding-Birds"){
-      return("Abundance-weighted habitat suitability per point count of 150 minutes")
+      return("Abundance = Breeding Birds per point count of 150 minutes")
     } else {
-      return("Abundance-weighted habitat suitability  per 4 traps over a 14-day collection period")
+      return("Abundance = Beetles per trap night over a year (i.e., summation of abundance divided by the total number of trap-nights over a year")
     }
   )
   
