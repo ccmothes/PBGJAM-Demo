@@ -135,7 +135,7 @@ corner_element = HTML(paste0('<a href=',shQuote("https://pbgjam.env.duke.edu/"),
 ui <- 
   navbarPage(id = "nav",
              tags$a(
-               href="https://pbgjam.env.duke.edu/",
+               href="https://pbgjam.org",
                tags$img(src="pbgjam_logo.png",
                         title="PBGJAM Website"),
                width="20%",
