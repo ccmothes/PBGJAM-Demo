@@ -195,6 +195,10 @@ ui <-
                                h3("With the support of NASA, we use satellites to monitor our changing planet,
                                   and through the National Ecological Observatory Network (NEON), we
                                   track how these changes will impact North America's species and wildlife communities"),
+                               p(em("NASA-AIST 16 & 18 grants to", a(href = 'https://nicholas.duke.edu/people/faculty/swenson', 'Jennifer J. Swenson'),
+                                    "&", a(href = 'https://nicholas.duke.edu/people/faculty/clark', 'James Clark'))),
+                                    #a(href = 'https://nicholas.duke.edu/', 'Nicholas School of Environment'), ', Duke University')),
+                               p(em(a(href = 'https://nicholas.duke.edu/', 'Nicholas School of Environment'), ', Duke University')),
                                br(),
                                h3("We offer online tools and maps to explore these changes, and the option
                                   to download this information for your own use"))),
@@ -321,12 +325,12 @@ ui <-
                       ),
              
              ## neon --------------------------------------------------------------------
-             tabPanel("NEON Sites",
+             tabPanel("NEON Biodiversity",
                       #Stop leaflet elements from covering select inputs
                       
                       fluidPage(
                         fluidRow(
-                          h2(strong("Ground Beetle species abundance and habitat variable exploration"))
+                          h2(strong("Ground beetle species abundance and habitat variable exploration"))
                         ),
                         hr(),
                         

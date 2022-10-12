@@ -75,11 +75,19 @@ div.row.header {
 }
 
 
-.title p, h3 {
+.title h3 {
   padding: 15px;
   text-align: center;
   margin: auto;
 }
+
+
+.title p {
+  padding: 0px;
+  text-align: center;
+  margin: auto;
+}
+
 
 .title strong{
   /*display: inline-block;*/
